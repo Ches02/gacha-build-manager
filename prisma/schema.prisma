@@ -9,5 +9,21 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
+}
+
+model CharacterDefinition {
+  key          String                 @id
+  translations CharacterTranslation[]
+}
+
+model CharacterTranslation {
+  id            Int                 @id @default(autoincrement())
+  characterKey  String
+  language      String
+  displayName   String
+
+  character     CharacterDefinition @relation(fields: [characterKey], references: [key], onDelete: Cascade)
+
+  @@unique([characterKey, language])
 }
