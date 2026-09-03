@@ -1,12 +1,22 @@
 import { createServer } from "node:http";
-import { prisma } from "../src/lib/prisma.ts";
+import { getWeapons } from "./services/weaponService.ts";
+import { getCharacters } from "./services/characterService.ts";
+import { getArtifactSets } from "./services/artifactSetService.ts";
+import { getArtifacts } from "./services/artifactService.ts";
+import { getLoadouts } from "./services/loadoutService.ts";
+import { getBuildGuides } from "./services/BuildGuideService.ts";
 
 const server = createServer(async (_req, res) => {
   try {
-    const weapons = await prisma.weaponDefinition.findMany();
+    const weapons = await getWeapons("es");
+    const characters = await getCharacters("es");
+    const artifactSets = await getArtifactSets("es");
+    const artifacts = await getArtifacts("es");
+    const loadouts = await getLoadouts();
+    const buildGuides = await getBuildGuides();
 
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(weapons));
+    res.end(JSON.stringify({ weapons, characters, artifactSets, artifacts, loadouts, buildGuides }));
   } catch (error) {
     console.error(error);
 

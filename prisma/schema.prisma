@@ -13,87 +13,79 @@ datasource db {
 }
 
 model CharacterDefinition {
-  key           String @id
+  key           String                @id
   rarity        Int //@default(0)
   element       String
   weaponTypeKey String
-  weaponType  WeaponType            @relation(fields: [weaponTypeKey], references: [key])
-  characters  Character[]
-  buildGuides BuildGuideCharacter[]
+  nation        String
+  weaponType    WeaponType            @relation(fields: [weaponTypeKey], references: [key])
+  characters    Character[]
+  buildGuides   BuildGuideCharacter[]
 }
 
 model Character {
-  id            Int    @id @default(autoincrement())
-  definitionKey String
-  level         Int
-  constellation Int
-  friendship    Int
+  id                  Int                 @id @default(autoincrement())
+  definitionKey       String
+  level               Int
+  constellation       Int
+  friendship          Int
+  ascension           Int
   normalAttackLevel   Int
   elementalSkillLevel Int
   elementalBurstLevel Int
-  definition CharacterDefinition @relation(fields: [definitionKey], references: [key])
-  loadouts Loadout[]
+  definition          CharacterDefinition @relation(fields: [definitionKey], references: [key])
+  loadouts            Loadout[]
 }
 
 model WeaponDefinition {
-  key            String @id
+  key            String             @id
   rarity         Int
   baseATK        Int
   subStatTypeKey String //@default("atk-p")
   subStat        Float
   weaponTypeKey  String
-  weaponType  WeaponType         @relation(fields: [weaponTypeKey], references: [key])
-  subStatType StatType           @relation(fields: [subStatTypeKey], references: [key])
-  weapons     Weapon[]
-  buildGuides BuildGuideWeapon[]
+  weaponType     WeaponType         @relation(fields: [weaponTypeKey], references: [key])
+  subStatType    StatType           @relation(fields: [subStatTypeKey], references: [key])
+  weapons        Weapon[]
+  buildGuides    BuildGuideWeapon[]
 }
 
 model Weapon {
-  id            Int    @id @default(autoincrement())
+  id            Int              @id @default(autoincrement())
   definitionKey String
-  level      Int
-  ascension  Int
-  refinement Int
-  definition WeaponDefinition @relation(fields: [definitionKey], references: [key])
-  loadouts Loadout[]
+  level         Int
+  refinement    Int
+  definition    WeaponDefinition @relation(fields: [definitionKey], references: [key])
+  loadouts      Loadout[]
 }
 
 model ArtifactSetDefinition {
   key         String                  @id
-  artifacts   ArtifactDefinition[]
+  artifacts   Artifact[]
   buildGuides BuildGuideArtifactSet[]
 }
 
-model ArtifactDefinition {
-  id      Int    @id @default(autoincrement())
-  setKey  String
-  slotKey String
-  artifactSet ArtifactSetDefinition @relation(fields: [setKey], references: [key])
-  slot        ArtifactSlot          @relation(fields: [slotKey], references: [key])
-  artifacts   Artifact[]
-  @@unique([setKey, slotKey])
-}
-
 model Artifact {
-  id           Int @id @default(autoincrement())
-  definitionId Int
-  level  Int
-  locked Boolean @default(false)
-  definition ArtifactDefinition @relation(fields: [definitionId], references: [id])
+  id             Int    @id @default(autoincrement())
+  setKey         String
+  slotKey        String
+  level          Int
+  artifactSet    ArtifactSetDefinition @relation(fields: [setKey], references: [key])
+  slot           ArtifactSlot          @relation(fields: [slotKey], references: [key])
   mainStatTypeKey String
   mainStatValue   Float
-  mainStatType StatType @relation(fields: [mainStatTypeKey], references: [key])
-  subStats ArtifactSubStat[]
+  mainStat        StatType             @relation(fields: [mainStatTypeKey], references: [key])
+  subStats        ArtifactSubStat[]
   artifactLoadouts ArtifactLoadoutItem[]
 }
 
 model ArtifactSubStat {
-  id         Int @id @default(autoincrement())
-  artifactId Int
+  id          Int      @id @default(autoincrement())
+  artifactId  Int
   statTypeKey String
   value       Float
-  artifact Artifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
-  statType StatType @relation(fields: [statTypeKey], references: [key])
+  artifact    Artifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+  statType    StatType @relation(fields: [statTypeKey], references: [key])
 }
 
 model Translation {
@@ -103,6 +95,7 @@ model Translation {
   language   String
   field      String
   text       String
+
   @@unique([entityType, key, language, field])
 }
 
@@ -114,7 +107,7 @@ model WeaponType {
 
 model ArtifactSlot {
   key                 String               @id
-  artifacts           ArtifactDefinition[]
+  artifacts           Artifact[]
   buildGuideMainStats BuildGuideMainStat[]
 }
 
@@ -128,22 +121,22 @@ model StatType {
 }
 
 model BuildGuide {
-  id          Int     @id @default(autoincrement())
-  name        String
-  description String?
+  id             Int                      @id @default(autoincrement())
+  name           String
+  description    String?
   characters     BuildGuideCharacter[]
   weapons        BuildGuideWeapon[]
   artifactSets   BuildGuideArtifactSet[]
   mainStats      BuildGuideMainStat[]
   statPriorities BuildGuideStatPriority[]
-  loadouts Loadout[]
+  loadouts       Loadout[]
 }
 
 model BuildGuideCharacter {
   buildGuideId           Int
   characterDefinitionKey String
-  buildGuide BuildGuide          @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
-  character  CharacterDefinition @relation(fields: [characterDefinitionKey], references: [key], onDelete: Cascade)
+  buildGuide             BuildGuide          @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
+  character              CharacterDefinition @relation(fields: [characterDefinitionKey], references: [key], onDelete: Cascade)
 
   @@id([buildGuideId, characterDefinitionKey])
 }
@@ -151,8 +144,9 @@ model BuildGuideCharacter {
 model BuildGuideWeapon {
   buildGuideId Int
   weaponKey    String
-  buildGuide BuildGuide       @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
-  weapon     WeaponDefinition @relation(fields: [weaponKey], references: [key], onDelete: Cascade)
+  buildGuide   BuildGuide       @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
+  weapon       WeaponDefinition @relation(fields: [weaponKey], references: [key], onDelete: Cascade)
+
   @@id([buildGuideId, weaponKey])
 }
 
@@ -160,59 +154,62 @@ model BuildGuideArtifactSet {
   buildGuideId   Int
   artifactSetKey String
   pieces         Int
-  buildGuide  BuildGuide            @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
-  artifactSet ArtifactSetDefinition @relation(fields: [artifactSetKey], references: [key], onDelete: Cascade)
+  buildGuide     BuildGuide            @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
+  artifactSet    ArtifactSetDefinition @relation(fields: [artifactSetKey], references: [key], onDelete: Cascade)
 
-  @@id([buildGuideId, artifactSetKey])
+  @@id([buildGuideId, artifactSetKey, pieces])
 }
 
 model BuildGuideMainStat {
   buildGuideId Int
   slotKey      String
   statTypeKey  String
-  buildGuide BuildGuide   @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
-  slot       ArtifactSlot @relation(fields: [slotKey], references: [key], onDelete: Cascade)
-  statType   StatType     @relation(fields: [statTypeKey], references: [key], onDelete: Cascade)
+  buildGuide   BuildGuide   @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
+  slot         ArtifactSlot @relation(fields: [slotKey], references: [key], onDelete: Cascade)
+  statType     StatType     @relation(fields: [statTypeKey], references: [key], onDelete: Cascade)
+
   @@id([buildGuideId, slotKey, statTypeKey])
 }
 
 model BuildGuideStatPriority {
-  id           Int    @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   buildGuideId Int
   statTypeKey  String
   priority     Int
   targetValue  Float?
-  buildGuide BuildGuide @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
-  statType   StatType   @relation(fields: [statTypeKey], references: [key], onDelete: Cascade)
+  buildGuide   BuildGuide @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
+  statType     StatType   @relation(fields: [statTypeKey], references: [key], onDelete: Cascade)
+
   @@unique([buildGuideId, priority])
 }
 
 model ArtifactLoadout {
-  id          Int    @id @default(autoincrement())
+  id          Int                   @id @default(autoincrement())
   name        String
   description String?
-  artifacts ArtifactLoadoutItem[]
-  loadouts Loadout[]
+  artifacts   ArtifactLoadoutItem[]
+  loadouts    Loadout[]
 }
 
 model ArtifactLoadoutItem {
   artifactLoadoutId Int
   artifactId        Int
-  artifactLoadout ArtifactLoadout @relation(fields: [artifactLoadoutId], references: [id], onDelete: Cascade)
-  artifact      Artifact @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+  artifactLoadout   ArtifactLoadout @relation(fields: [artifactLoadoutId], references: [id], onDelete: Cascade)
+  artifact          Artifact        @relation(fields: [artifactId], references: [id], onDelete: Cascade)
+
   @@id([artifactLoadoutId, artifactId])
 }
 
 model Loadout {
-  id               Int    @id @default(autoincrement())
-  name             String
-  description      String?
-  characterId      Int?
-  weaponId         Int?
+  id                Int              @id @default(autoincrement())
+  name              String
+  description       String?
+  characterId       Int?
+  weaponId          Int?
   artifactLoadoutId Int?
-  buildGuideId     Int?
-  character       Character?       @relation(fields: [characterId], references: [id], onDelete: SetNull)
-  weapon          Weapon?          @relation(fields: [weaponId], references: [id], onDelete: SetNull)
-  artifactLoadout ArtifactLoadout? @relation(fields: [artifactLoadoutId], references: [id], onDelete: SetNull)
-  buildGuide      BuildGuide?      @relation(fields: [buildGuideId], references: [id], onDelete: SetNull)
+  buildGuideId      Int?
+  character         Character?       @relation(fields: [characterId], references: [id], onDelete: SetNull)
+  weapon            Weapon?          @relation(fields: [weaponId], references: [id], onDelete: SetNull)
+  artifactLoadout   ArtifactLoadout? @relation(fields: [artifactLoadoutId], references: [id], onDelete: SetNull)
+  buildGuide        BuildGuide?      @relation(fields: [buildGuideId], references: [id], onDelete: SetNull)
 }
