@@ -1,0 +1,19 @@
+llenado de BD
+
+- Characters Definition
+- character name traducciones
+
+- weapon Definition
+- weapon name translation
+- weapon effect translation
+
+- artifactset Definition
+- atifact set translation
+- artefacto 3/4 pieces translation
+
+
+a futuro
+
+1- materiales necesarios para subida de lvl y desarrollo
+2- calculo de stats 
+3- admin para actualizar BD catalogo

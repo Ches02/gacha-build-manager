@@ -1,0 +1,28 @@
+///TABLAS DE BD///
+
+
+
+////APIS////
+
+/api/characters
+/api/characters/:key
+/api/user/characters
+/api/user/characters/1
+POST: curl.exe -X POST http://localhost:3000/api/user/characters -H "Content-Type: application/json" -d '{\"definitionKey\":\"shogun_raiden\",\"level\":90,\"constellation\":0,\"friendship\":10,\"ascension\":6,\"normalAttackLevel\":9,\"elementalSkillLevel\":9,\"elementalBurstLevel\":10}'
+PUT: curl.exe -X PUT http://localhost:3000/api/user/characters/2 -H "Content-Type: application/json" -d '{\"level\":80,\"constellation\":0,\"friendship\":8,\"ascension\":5,\"normalAttackLevel\":8,\"elementalSkillLevel\":9,\"elementalBurstLevel\":10}'
+DELETE: curl.exe -X DELETE http://localhost:3000/api/user/characters/2
+
+/api/weapons
+/api/weapons/:key
+
+/api/artifact-sets
+/api/artifact-sets/:key
+
+/api/artifacts
+/api/artifacts/:id
+
+/api/loadouts
+/api/loadouts/:id
+
+/api/build-guides
+/api/build-guides/:id
