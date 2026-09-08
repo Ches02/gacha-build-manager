@@ -175,3 +175,107 @@ export async function getWeapon(key: string, language: string) {
     rarity: weapon.rarity,
   };
 }
+
+/* =========================
+   USER WEAPONS
+   ========================= */
+
+export async function getUserWeapons(userId: number) {
+  return prisma.weapon.findMany({
+    where: {
+      userId,
+    },
+    include: {
+      definition: true,
+    },
+  });
+}
+
+export async function getUserWeapon(
+  id: number,
+  userId: number,
+) {
+  return prisma.weapon.findFirst({
+    where: {
+      id,
+      userId,
+    },
+    include: {
+      definition: true,
+    },
+  });
+}
+
+export async function createWeapon(
+  userId: number,
+  data: {
+    definitionKey: string;
+    level: number;
+    refinement: number;
+  },
+) {
+  return prisma.weapon.create({
+    data: {
+      userId,
+      definitionKey: data.definitionKey,
+      level: data.level,
+      refinement: data.refinement,
+    },
+    include: {
+      definition: true,
+    },
+  });
+}
+
+export async function updateWeapon(
+  id: number,
+  userId: number,
+  data: {
+    definitionKey?: string;
+    level?: number;
+    refinement?: number;
+  },
+) {
+  const weapon = await prisma.weapon.findFirst({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!weapon) {
+    return null;
+  }
+
+  return prisma.weapon.update({
+    where: {
+      id,
+    },
+    data,
+    include: {
+      definition: true,
+    },
+  });
+}
+
+export async function deleteWeapon(
+  id: number,
+  userId: number,
+) {
+  const weapon = await prisma.weapon.findFirst({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!weapon) {
+    return null;
+  }
+
+  return prisma.weapon.delete({
+    where: {
+      id,
+    },
+  });
+}

@@ -14,6 +14,9 @@ DELETE: curl.exe -X DELETE http://localhost:3000/api/user/characters/2
 
 /api/weapons
 /api/weapons/:key
+/api/user/weapons
+/api/user/weapons/2
+POST: curl.exe -X POST http://localhost:3000/api/user/weapons -H "Content-Type: application/json" -d '{\"definitionKey\":\"serpiente_marina\",\"level\":90,\"refinement\":5}'
 
 /api/artifact-sets
 /api/artifact-sets/:key

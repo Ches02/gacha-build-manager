@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { getWeapons, getWeapon } from "./services/weaponService.ts";
+import { getWeapons, getWeapon, getUserWeapons, getUserWeapon, createWeapon, updateWeapon, deleteWeapon, } from "./services/weaponService.ts";
 import { getCharacters, getCharacter, createCharacter, getUserCharacters, getUserCharacter, updateCharacter, deleteCharacter } from "./services/characterService.ts";
 import { getArtifactSets, getArtifactSet } from "./services/artifactSetService.ts";
 import { getArtifacts, getArtifact } from "./services/artifactService.ts";
@@ -21,39 +21,39 @@ const server = createServer(async (req, res) => {
     }
 
     if (
-  req.method === "GET" &&
-  url.pathname.match(/^\/api\/user\/characters\/([^/]+)$/)
-) {
-  const characterId = url.pathname.match(
-    /^\/api\/user\/characters\/([^/]+)$/,
-  );
+      req.method === "GET" &&
+      url.pathname.match(/^\/api\/user\/characters\/([^/]+)$/)
+    ) {
+      const characterId = url.pathname.match(
+        /^\/api\/user\/characters\/([^/]+)$/,
+      );
 
-  if (!characterId) {
-    res.writeHead(400);
-    res.end(JSON.stringify({ error: "ID de character inválido" }));
-    return;
-  }
+      if (!characterId) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de character inválido" }));
+        return;
+      }
 
-  const id = Number(characterId[1]);
+      const id = Number(characterId[1]);
 
-  if (!Number.isInteger(id)) {
-    res.writeHead(400);
-    res.end(JSON.stringify({ error: "ID de character inválido" }));
-    return;
-  }
+      if (!Number.isInteger(id)) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de character inválido" }));
+        return;
+      }
 
-  const character = await getUserCharacter(id, CURRENT_USER_ID);
+      const character = await getUserCharacter(id, CURRENT_USER_ID);
 
-  if (!character) {
-    res.writeHead(404);
-    res.end(JSON.stringify({ error: "Character no encontrado" }));
-    return;
-  }
+      if (!character) {
+        res.writeHead(404);
+        res.end(JSON.stringify({ error: "Character no encontrado" }));
+        return;
+      }
 
-  res.writeHead(200);
-  res.end(JSON.stringify({ character }));
-  return;
-}
+      res.writeHead(200);
+      res.end(JSON.stringify({ character }));
+      return;
+    }
 
     if (req.method === "POST" && url.pathname === "/api/user/characters") {
       let body = "";
@@ -305,6 +305,185 @@ const server = createServer(async (req, res) => {
 
       res.writeHead(200);
       res.end(JSON.stringify({ character }));
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/user/weapons") {
+      const weapons = await getUserWeapons(CURRENT_USER_ID);
+
+      res.writeHead(200);
+      res.end(JSON.stringify({ weapons }));
+      return;
+    }
+
+    if (
+      req.method === "GET" &&
+      url.pathname.match(/^\/api\/user\/weapons\/([^/]+)$/)
+    ) {
+      const weaponId = url.pathname.match(
+        /^\/api\/user\/weapons\/([^/]+)$/,
+      );
+
+      if (!weaponId) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de arma inválido" }));
+        return;
+      }
+
+      const id = Number(weaponId[1]);
+
+      if (!Number.isInteger(id)) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de arma inválido" }));
+        return;
+      }
+
+      const weapon = await getUserWeapon(id, CURRENT_USER_ID);
+
+      if (!weapon) {
+        res.writeHead(404);
+        res.end(JSON.stringify({ error: "Arma no encontrada" }));
+        return;
+      }
+
+      res.writeHead(200);
+      res.end(JSON.stringify({ weapon }));
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/user/weapons") {
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+
+      req.on("end", async () => {
+        try {
+          const data = JSON.parse(body);
+
+          const weapon = await createWeapon(
+            CURRENT_USER_ID,
+            data,
+          );
+
+          res.writeHead(201);
+          res.end(JSON.stringify({ weapon }));
+        } catch {
+          res.writeHead(400);
+          res.end(
+            JSON.stringify({
+              error: "JSON inválido",
+            }),
+          );
+        }
+      });
+
+      return;
+    }
+
+    if (
+      req.method === "PUT" &&
+      url.pathname.match(/^\/api\/user\/weapons\/([^/]+)$/)
+    ) {
+      const weaponId = url.pathname.match(
+        /^\/api\/user\/weapons\/([^/]+)$/,
+      );
+
+      if (!weaponId) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de arma inválido" }));
+        return;
+      }
+
+      const id = Number(weaponId[1]);
+
+      if (!Number.isInteger(id)) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de arma inválido" }));
+        return;
+      }
+
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+
+      req.on("end", async () => {
+        try {
+          const data = JSON.parse(body);
+
+          const weapon = await updateWeapon(
+            id,
+            CURRENT_USER_ID,
+            data,
+          );
+
+          if (!weapon) {
+            res.writeHead(404);
+            res.end(
+              JSON.stringify({
+                error: "Arma no encontrada",
+              }),
+            );
+            return;
+          }
+
+          res.writeHead(200);
+          res.end(JSON.stringify({ weapon }));
+        } catch {
+          res.writeHead(400);
+          res.end(
+            JSON.stringify({
+              error: "JSON inválido",
+            }),
+          );
+        }
+      });
+
+      return;
+    }
+
+    if (
+      req.method === "DELETE" &&
+      url.pathname.match(/^\/api\/user\/weapons\/([^/]+)$/)
+    ) {
+      const weaponId = url.pathname.match(
+        /^\/api\/user\/weapons\/([^/]+)$/,
+      );
+
+      if (!weaponId) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de arma inválido" }));
+        return;
+      }
+
+      const id = Number(weaponId[1]);
+
+      if (!Number.isInteger(id)) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de arma inválido" }));
+        return;
+      }
+
+      const weapon = await deleteWeapon(
+        id,
+        CURRENT_USER_ID,
+      );
+
+      if (!weapon) {
+        res.writeHead(404);
+        res.end(
+          JSON.stringify({
+            error: "Arma no encontrada",
+          }),
+        );
+        return;
+      }
+
+      res.writeHead(200);
+      res.end(JSON.stringify({ weapon }));
       return;
     }
 
