@@ -1,8 +1,8 @@
 import { createServer } from "node:http";
-import { getWeapons, getWeapon, getUserWeapons, getUserWeapon, createWeapon, updateWeapon, deleteWeapon, } from "./services/weaponService.ts";
+import { getWeapons, getWeapon, getUserWeapons, getUserWeapon, createWeapon, updateWeapon, deleteWeapon } from "./services/weaponService.ts";
 import { getCharacters, getCharacter, createCharacter, getUserCharacters, getUserCharacter, updateCharacter, deleteCharacter } from "./services/characterService.ts";
 import { getArtifactSets, getArtifactSet } from "./services/artifactSetService.ts";
-import { getArtifacts, getArtifact } from "./services/artifactService.ts";
+import { getArtifacts, getArtifact, getUserArtifacts, getUserArtifact, createArtifact, updateArtifact, deleteArtifact } from "./services/artifactService.ts";
 import { getLoadouts, getLoadout } from "./services/loadoutService.ts";
 import { getBuildGuides, getBuildGuide } from "./services/buildGuideService.ts";
 
@@ -484,6 +484,185 @@ const server = createServer(async (req, res) => {
 
       res.writeHead(200);
       res.end(JSON.stringify({ weapon }));
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/user/artifacts") {
+      const artifacts = await getUserArtifacts(CURRENT_USER_ID);
+
+      res.writeHead(200);
+      res.end(JSON.stringify({ artifacts }));
+      return;
+    }
+
+    if (
+      req.method === "GET" &&
+      url.pathname.match(/^\/api\/user\/artifacts\/([^/]+)$/)
+    ) {
+      const artifactId = url.pathname.match(
+        /^\/api\/user\/artifacts\/([^/]+)$/,
+      );
+
+      if (!artifactId) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de artefacto inválido" }));
+        return;
+      }
+
+      const id = Number(artifactId[1]);
+
+      if (!Number.isInteger(id)) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de artefacto inválido" }));
+        return;
+      }
+
+      const artifact = await getUserArtifact(id, CURRENT_USER_ID);
+
+      if (!artifact) {
+        res.writeHead(404);
+        res.end(JSON.stringify({ error: "Artefacto no encontrado" }));
+        return;
+      }
+
+      res.writeHead(200);
+      res.end(JSON.stringify({ artifact }));
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/user/artifacts") {
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+
+      req.on("end", async () => {
+        try {
+          const data = JSON.parse(body);
+
+          const artifact = await createArtifact(
+            CURRENT_USER_ID,
+            data,
+          );
+
+          res.writeHead(201);
+          res.end(JSON.stringify({ artifact }));
+        } catch {
+          res.writeHead(400);
+          res.end(
+            JSON.stringify({
+              error: "JSON inválido",
+            }),
+          );
+        }
+      });
+
+      return;
+    }
+
+    if (
+      req.method === "PUT" &&
+      url.pathname.match(/^\/api\/user\/artifacts\/([^/]+)$/)
+    ) {
+      const artifactId = url.pathname.match(
+        /^\/api\/user\/artifacts\/([^/]+)$/,
+      );
+
+      if (!artifactId) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de artefacto inválido" }));
+        return;
+      }
+
+      const id = Number(artifactId[1]);
+
+      if (!Number.isInteger(id)) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de artefacto inválido" }));
+        return;
+      }
+
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+
+      req.on("end", async () => {
+        try {
+          const data = JSON.parse(body);
+
+          const artifact = await updateArtifact(
+            id,
+            CURRENT_USER_ID,
+            data,
+          );
+
+          if (!artifact) {
+            res.writeHead(404);
+            res.end(
+              JSON.stringify({
+                error: "Artefacto no encontrado",
+              }),
+            );
+            return;
+          }
+
+          res.writeHead(200);
+          res.end(JSON.stringify({ artifact }));
+        } catch {
+          res.writeHead(400);
+          res.end(
+            JSON.stringify({
+              error: "JSON inválido",
+            }),
+          );
+        }
+      });
+
+      return;
+    }
+
+    if (
+      req.method === "DELETE" &&
+      url.pathname.match(/^\/api\/user\/artifacts\/([^/]+)$/)
+    ) {
+      const artifactId = url.pathname.match(
+        /^\/api\/user\/artifacts\/([^/]+)$/,
+      );
+
+      if (!artifactId) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de artefacto inválido" }));
+        return;
+      }
+
+      const id = Number(artifactId[1]);
+
+      if (!Number.isInteger(id)) {
+        res.writeHead(400);
+        res.end(JSON.stringify({ error: "ID de artefacto inválido" }));
+        return;
+      }
+
+      const artifact = await deleteArtifact(
+        id,
+        CURRENT_USER_ID,
+      );
+
+      if (!artifact) {
+        res.writeHead(404);
+        res.end(
+          JSON.stringify({
+            error: "Artefacto no encontrado",
+          }),
+        );
+        return;
+      }
+
+      res.writeHead(200);
+      res.end(JSON.stringify({ artifact }));
       return;
     }
 
