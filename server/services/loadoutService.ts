@@ -1,18 +1,28 @@
 import { prisma } from "../../src/lib/prisma.ts";
 
-export async function getLoadouts() {
+/* =========================
+   USER LOADOUTS
+   ========================= */
+
+export async function getUserLoadouts(userId: number) {
   const loadouts = await prisma.loadout.findMany({
+    where: {
+      userId,
+    },
+
     include: {
       character: {
         include: {
           definition: true,
         },
       },
+
       weapon: {
         include: {
           definition: true,
         },
       },
+
       artifactLoadout: {
         include: {
           artifacts: {
@@ -26,6 +36,7 @@ export async function getLoadouts() {
           },
         },
       },
+
       buildGuide: true,
     },
   });
@@ -58,6 +69,7 @@ export async function getLoadouts() {
       ? {
           id: loadout.character.id,
           key: loadout.character.definition.key,
+
           name:
             getTranslation(
               "character",
@@ -69,6 +81,7 @@ export async function getLoadouts() {
 
           weaponType: {
             key: loadout.character.definition.weaponTypeKey,
+
             name:
               getTranslation(
                 "weapontype",
@@ -121,6 +134,7 @@ export async function getLoadouts() {
 
             set: {
               key: item.artifact.setKey,
+
               name:
                 getTranslation(
                   "artefacto",
@@ -131,6 +145,7 @@ export async function getLoadouts() {
 
             slot: {
               key: item.artifact.slotKey,
+
               name:
                 getTranslation(
                   "artifactSlot",
@@ -141,23 +156,27 @@ export async function getLoadouts() {
 
             mainStat: {
               key: item.artifact.mainStatTypeKey,
+
               name:
                 getTranslation(
                   "stat",
                   item.artifact.mainStatTypeKey,
                   "name",
                 ) ?? item.artifact.mainStatTypeKey,
+
               value: item.artifact.mainStatValue,
             },
 
             subStats: item.artifact.subStats.map((subStat) => ({
               key: subStat.statTypeKey,
+
               name:
                 getTranslation(
                   "stat",
                   subStat.statTypeKey,
                   "name",
                 ) ?? subStat.statTypeKey,
+
               value: subStat.value,
             })),
 
@@ -176,22 +195,29 @@ export async function getLoadouts() {
   }));
 }
 
-export async function getLoadout(id: number) {
-  const loadout = await prisma.loadout.findUnique({
+export async function getUserLoadout(
+  id: number,
+  userId: number,
+) {
+  const loadout = await prisma.loadout.findFirst({
     where: {
       id,
+      userId,
     },
+
     include: {
       character: {
         include: {
           definition: true,
         },
       },
+
       weapon: {
         include: {
           definition: true,
         },
       },
+
       artifactLoadout: {
         include: {
           artifacts: {
@@ -205,6 +231,7 @@ export async function getLoadout(id: number) {
           },
         },
       },
+
       buildGuide: true,
     },
   });
@@ -241,6 +268,7 @@ export async function getLoadout(id: number) {
       ? {
           id: loadout.character.id,
           key: loadout.character.definition.key,
+
           name:
             getTranslation(
               "character",
@@ -252,6 +280,7 @@ export async function getLoadout(id: number) {
 
           weaponType: {
             key: loadout.character.definition.weaponTypeKey,
+
             name:
               getTranslation(
                 "weapontype",
@@ -304,6 +333,7 @@ export async function getLoadout(id: number) {
 
             set: {
               key: item.artifact.setKey,
+
               name:
                 getTranslation(
                   "artefacto",
@@ -314,6 +344,7 @@ export async function getLoadout(id: number) {
 
             slot: {
               key: item.artifact.slotKey,
+
               name:
                 getTranslation(
                   "artifactSlot",
@@ -324,23 +355,27 @@ export async function getLoadout(id: number) {
 
             mainStat: {
               key: item.artifact.mainStatTypeKey,
+
               name:
                 getTranslation(
                   "stat",
                   item.artifact.mainStatTypeKey,
                   "name",
                 ) ?? item.artifact.mainStatTypeKey,
+
               value: item.artifact.mainStatValue,
             },
 
             subStats: item.artifact.subStats.map((subStat) => ({
               key: subStat.statTypeKey,
+
               name:
                 getTranslation(
                   "stat",
                   subStat.statTypeKey,
                   "name",
                 ) ?? subStat.statTypeKey,
+
               value: subStat.value,
             })),
 
@@ -357,4 +392,123 @@ export async function getLoadout(id: number) {
         }
       : null,
   };
+}
+
+/* =========================
+   CREATE LOADOUT
+   ========================= */
+
+export async function createLoadout(
+  userId: number,
+  data: {
+    name: string;
+    description?: string;
+    characterId?: number | null;
+    weaponId?: number | null;
+    artifactLoadoutId?: number | null;
+    buildGuideId?: number | null;
+  },
+) {
+  const loadout = await prisma.loadout.create({
+    data: {
+      userId,
+      name: data.name,
+      description: data.description ?? null,
+      characterId: data.characterId ?? null,
+      weaponId: data.weaponId ?? null,
+      artifactLoadoutId: data.artifactLoadoutId ?? null,
+      buildGuideId: data.buildGuideId ?? null,
+    },
+  });
+
+  return loadout;
+}
+
+/* =========================
+   UPDATE LOADOUT
+   ========================= */
+
+export async function updateLoadout(
+  id: number,
+  userId: number,
+  data: {
+    name?: string;
+    description?: string | null;
+    characterId?: number | null;
+    weaponId?: number | null;
+    artifactLoadoutId?: number | null;
+    buildGuideId?: number | null;
+  },
+) {
+  const existingLoadout = await prisma.loadout.findFirst({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!existingLoadout) {
+    return null;
+  }
+
+  const loadout = await prisma.loadout.update({
+    where: {
+      id,
+    },
+    data: {
+      ...(data.name !== undefined && {
+        name: data.name,
+      }),
+
+      ...(data.description !== undefined && {
+        description: data.description,
+      }),
+
+      ...(data.characterId !== undefined && {
+        characterId: data.characterId,
+      }),
+
+      ...(data.weaponId !== undefined && {
+        weaponId: data.weaponId,
+      }),
+
+      ...(data.artifactLoadoutId !== undefined && {
+        artifactLoadoutId: data.artifactLoadoutId,
+      }),
+
+      ...(data.buildGuideId !== undefined && {
+        buildGuideId: data.buildGuideId,
+      }),
+    },
+  });
+
+  return loadout;
+}
+
+/* =========================
+   DELETE LOADOUT
+   ========================= */
+
+export async function deleteLoadout(
+  id: number,
+  userId: number,
+) {
+  const existingLoadout = await prisma.loadout.findFirst({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!existingLoadout) {
+    return null;
+  }
+
+  await prisma.loadout.delete({
+    where: {
+      id,
+    },
+  });
+
+  return existingLoadout;
 }
