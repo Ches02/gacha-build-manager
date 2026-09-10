@@ -162,3 +162,107 @@ export function validateId(
 
   return null;
 }
+
+/* =========================
+   OPTIONAL ID
+   ========================= */
+
+export function validateOptionalId(
+  value: unknown,
+  fieldName: string,
+): string | null {
+  if (value === null) {
+    return null;
+  }
+
+  return validateId(
+    value,
+    fieldName,
+  );
+}
+
+/* =========================
+   POSITIVE NUMBER
+   ========================= */
+
+export function validatePositiveNumber(
+  value: unknown,
+  fieldName: string,
+): string | null {
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value)
+  ) {
+    return `${fieldName} debe ser un número`;
+  }
+
+  if (value < 0) {
+    return `${fieldName} debe ser un número positivo`;
+  }
+
+  return null;
+}
+
+/* =========================
+   STRING ARRAY
+   ========================= */
+
+export function validateStringArray(
+  value: unknown,
+  fieldName: string,
+  maxLength: number,
+): string[] {
+  const errors: string[] = [];
+
+  if (!Array.isArray(value)) {
+    errors.push(
+      `${fieldName} debe ser un array`,
+    );
+    return errors;
+  }
+
+  value.forEach((item, index) => {
+    const error = validateText(
+      item,
+      `${fieldName}[${index}]`,
+      maxLength,
+    );
+
+    if (error) {
+      errors.push(error);
+    }
+  });
+
+  return errors;
+}
+
+/* =========================
+   ID ARRAY
+   ========================= */
+
+export function validateIdArray(
+  value: unknown,
+  fieldName: string,
+): string[] {
+  const errors: string[] = [];
+
+  if (!Array.isArray(value)) {
+    errors.push(
+      `${fieldName} debe ser un array`,
+    );
+    return errors;
+  }
+
+  value.forEach((item, index) => {
+    const error = validateId(
+      item,
+      `${fieldName}[${index}]`,
+    );
+
+    if (error) {
+      errors.push(error);
+    }
+  });
+
+  return errors;
+}

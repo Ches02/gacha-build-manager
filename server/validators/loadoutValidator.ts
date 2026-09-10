@@ -1,22 +1,4 @@
-import { validateText, validateOptionalText, validateId } from "./commonValidator.ts";
-
-/* =========================
-   VALIDATE OPTIONAL ID
-   ========================= */
-
-function validateOptionalId(
-    value: unknown,
-    fieldName: string,
-): string | null {
-    if (value === null) {
-        return null;
-    }
-
-    return validateId(
-        value,
-        fieldName,
-    );
-}
+import { validateText, validateOptionalText, validateOptionalId } from "./commonValidator.ts";
 
 /* =========================
    CREATE LOADOUT

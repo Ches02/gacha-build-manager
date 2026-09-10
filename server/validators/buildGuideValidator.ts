@@ -1,38 +1,5 @@
-import {
-  validateText,
-  validateIntegerRange,
-} from "./commonValidator.ts";
+import { validateText, validateIntegerRange, validateStringArray } from "./commonValidator.ts";
 
-/* =========================
-   VALIDATE STRING ARRAY
-   ========================= */
-
-function validateStringArray(
-  value: unknown,
-  fieldName: string,
-  maxLength: number,
-): string[] {
-  const errors: string[] = [];
-
-  if (!Array.isArray(value)) {
-    errors.push(`${fieldName} debe ser un array`);
-    return errors;
-  }
-
-  value.forEach((item, index) => {
-    const error = validateText(
-      item,
-      `${fieldName}[${index}]`,
-      maxLength,
-    );
-
-    if (error) {
-      errors.push(error);
-    }
-  });
-
-  return errors;
-}
 
 /* =========================
    VALIDATE ARTIFACT SETS

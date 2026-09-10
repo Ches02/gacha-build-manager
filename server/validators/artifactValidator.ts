@@ -1,36 +1,4 @@
-import {
-  validateText,
-  validateIntegerRange,
-} from "./commonValidator.ts";
-
-/* =========================
-   VALIDATE NUMBER
-   ========================= */
-
-/*
- * Valida valores numéricos de stats.
- *
- * Permitimos cualquier número positivo.
- * Todavía no validamos si el valor es
- * específicamente válido para Genshin.
- */
-function validatePositiveNumber(
-  value: unknown,
-  fieldName: string,
-): string | null {
-  if (
-    typeof value !== "number" ||
-    !Number.isFinite(value)
-  ) {
-    return `${fieldName} debe ser un número`;
-  }
-
-  if (value < 0) {
-    return `${fieldName} debe ser un número positivo`;
-  }
-
-  return null;
-}
+import { validateText, validateIntegerRange, validatePositiveNumber } from "./commonValidator.ts";
 
 /* =========================
    VALIDATE SUBSTATS

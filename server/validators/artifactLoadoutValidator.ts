@@ -1,32 +1,4 @@
-import { validateText, validateId } from "./commonValidator.ts";
-
-/* =========================
-   VALIDATE ARTIFACT IDS
-   ========================= */
-
-function validateArtifactIds(
-  value: unknown,
-): string[] {
-  const errors: string[] = [];
-
-  if (!Array.isArray(value)) {
-    errors.push("artifactIds debe ser un array");
-    return errors;
-  }
-
-  value.forEach((artifactId, index) => {
-    const idError = validateId(
-      artifactId,
-      `artifactIds[${index}]`,
-    );
-
-    if (idError) {
-      errors.push(idError);
-    }
-  });
-
-  return errors;
-}
+import { validateText, validateIdArray } from "./commonValidator.ts";
 
 /* =========================
    CREATE ARTIFACT LOADOUT
@@ -61,7 +33,10 @@ export function validateArtifactLoadout(
 
   if (data.artifactIds !== undefined) {
     errors.push(
-      ...validateArtifactIds(data.artifactIds),
+      ...validateIdArray(
+        data.artifactIds,
+        "artifactIds",
+      ),
     );
   }
 
@@ -103,7 +78,10 @@ export function validateArtifactLoadoutUpdate(
 
   if (data.artifactIds !== undefined) {
     errors.push(
-      ...validateArtifactIds(data.artifactIds),
+      ...validateIdArray(
+        data.artifactIds,
+        "artifactIds",
+      ),
     );
   }
 
