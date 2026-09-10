@@ -1,4 +1,5 @@
 import { prisma } from "../../src/lib/prisma.ts";
+import { ReferenceValidationError } from "./serviceError.ts";
 
 export async function getCharacters(language: string) {
   const characters = await prisma.characterDefinition.findMany();
@@ -149,13 +150,14 @@ export async function updateCharacter(
   id: number,
   userId: number,
   data: {
-    level: number;
-    constellation: number;
-    friendship: number;
-    ascension: number;
-    normalAttackLevel: number;
-    elementalSkillLevel: number;
-    elementalBurstLevel: number;
+    definitionKey?: string;
+    level?: number;
+    constellation?: number;
+    friendship?: number;
+    ascension?: number;
+    normalAttackLevel?: number;
+    elementalSkillLevel?: number;
+    elementalBurstLevel?: number;
   },
 ) {
   const character = await prisma.character.findFirst({
@@ -169,18 +171,56 @@ export async function updateCharacter(
     return null;
   }
 
+  if (data.definitionKey !== undefined) {
+  const definition = await prisma.characterDefinition.findUnique({
+    where: {
+      key: data.definitionKey,
+    },
+  });
+
+  if (!definition) {
+    throw new ReferenceValidationError([
+      "definitionKey no corresponde a un personaje existente",
+    ]);
+  }
+}
+
   return prisma.character.update({
     where: {
       id,
     },
     data: {
-      level: data.level,
-      constellation: data.constellation,
-      friendship: data.friendship,
-      ascension: data.ascension,
-      normalAttackLevel: data.normalAttackLevel,
-      elementalSkillLevel: data.elementalSkillLevel,
-      elementalBurstLevel: data.elementalBurstLevel,
+      ...(data.definitionKey !== undefined && {
+        definitionKey: data.definitionKey,
+      }),
+
+      ...(data.level !== undefined && {
+        level: data.level,
+      }),
+
+      ...(data.constellation !== undefined && {
+        constellation: data.constellation,
+      }),
+
+      ...(data.friendship !== undefined && {
+        friendship: data.friendship,
+      }),
+
+      ...(data.ascension !== undefined && {
+        ascension: data.ascension,
+      }),
+
+      ...(data.normalAttackLevel !== undefined && {
+        normalAttackLevel: data.normalAttackLevel,
+      }),
+
+      ...(data.elementalSkillLevel !== undefined && {
+        elementalSkillLevel: data.elementalSkillLevel,
+      }),
+
+      ...(data.elementalBurstLevel !== undefined && {
+        elementalBurstLevel: data.elementalBurstLevel,
+      }),
     },
   });
 }

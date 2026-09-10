@@ -1,0 +1,43 @@
+Catalogo
+	└── GET		/api/characters
+	└── GET		/api/characters/diluc
+	└── GET		/api/weapons
+	└── GET		/api/weapons/lapida_del_lobo
+	└── GET		/api/artifact-sets
+	└── GET		/api/artifact-sets/bruja_carmesi
+User Characters
+	└── GET		/api/user/characters
+	└── GET		/api/user/characters/3
+	└── POST	/api/user/characters	{"definitionKey":"shogun_raiden","level":80,"constellation":0,"friendship":10,"ascension":6,"normalAttackLevel":9,"elementalSkillLevel":9,"elementalBurstLevel":10}
+	└── PUT		/api/user/characters/4	{"level":85,"constellation":5,"friendship":5,"ascension":5,"normalAttackLevel":5,"elementalSkillLevel":5,"elementalBurstLevel":5}
+	└── DELETE	/api/user/characters/4
+User Weapons
+	└── GET		/api/user/weapons
+	└── GET		/api/user/weapons/4
+	└── POST	/api/user/weapons	{"definitionKey":"serpiente_marina","level":80,"refinement":5}
+	└── PUT		/api/user/weapons/4	{"level":85,"refinement":3}
+	└── DELETE	/api/user/weapons/7
+User Artifacts
+	└── GET		/api/user/artifacts/1
+	└── GET		/api/user/artifacts
+	└── POST	/api/user/artifacts	{"setKey":"bruja_carmesi","slotKey":"reloj","level":20,"mainStatTypeKey":"atk-p","mainStatValue":46.6,"subStats":[{"statTypeKey":"c-rate","value":3.1},{"statTypeKey":"atk","value":19}]}
+	└── PUT		/api/user/artifacts/7	{"level":18,"mainStatValue":40,"subStats":[{"statTypeKey":"c-dmg","value":7.8},{"statTypeKey":"atk","value":14}]}
+	└── DELETE	/api/user/artifacts/8
+User Artifact Loadout
+	└── GET		/api/user/artifact-loadouts
+	└── GET		/api/user/artifact-loadouts/1
+	└── POST	/api/user/artifact-loadouts	{"name":"Build prueba Diluc","description":"Loadout de prueba","artifactIds":[1,2,3,4,5]}
+	└── PUT		/api/user/artifact-loadouts/1	{"name":"Bruja carmesí atk dps","description":"atk y crits","artifactIds":[1,2,3,4,5]}
+	└── DELETE	/api/user/artifact-loadouts/4
+Build Guides
+	└── GET		/api/user/build-guides
+	└── GET		/api/user/build-guides/1
+	└── POST	/api/user/build-guides	{"name":"Diluc DPS Test","description":"Build de prueba para Diluc","characters":["diluc"],"weapons":["lapida_del_lobo","serpiente_marina"],"artifactSets":[{"artifactSetKey":"bruja_carmesi","pieces":2},{"artifactSetKey":"bruja_carmesi","pieces":4}],"mainStats":[{"slotKey":"caliz","statTypeKey":"atk-p"},{"slotKey":"reloj","statTypeKey":"atk-p"},{"slotKey":"reloj","statTypeKey":"maestria"},{"slotKey":"tiara","statTypeKey":"c-dmg"},{"slotKey":"tiara","statTypeKey":"c-rate"}],"statPriorities":[{"statTypeKey":"c-dmg","priority":1,"targetValue":300},{"statTypeKey":"c-rate","priority":2,"targetValue":100},{"statTypeKey":"atk","priority":3,"targetValue":3000}]}
+	└── PUT		/api/user/build-guides/2	{"name":"Diluc DPS Test Actualizado","description":"Build actualizada para Diluc","weapons":["lapida_del_lobo"],"statPriorities":[{"statTypeKey":"c-rate","priority":1,"targetValue":70},{"statTypeKey":"c-dmg","priority":2,"targetValue":140}]}
+	└── DELETE	/api/user/build-guides/2
+User Loadouts
+	└── GET		/api/user/loadouts
+	└── GET		/api/user/loadouts/4
+	└── POST	/api/user/loadouts	{"name":"Build prueba Diluc","description":null,"characterId":null,"weaponId":null,"artifactLoadoutId":null,"buildGuideId":null}
+	└── PUT		/api/user/loadouts/4	{"name":"Build prueba Diluc","description":null,"characterId":1,"weaponId":null,"artifactLoadoutId":null,"buildGuideId":null}
+	└── DELETE	/api/user/loadouts/2

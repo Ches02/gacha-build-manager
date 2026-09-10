@@ -6,6 +6,11 @@ import { getUserArtifacts, getUserArtifact, createArtifact, updateArtifact, dele
 import { getUserBuildGuides, getUserBuildGuide, createBuildGuide, updateBuildGuide, deleteBuildGuide } from "./services/buildGuideService.ts";
 import { getUserArtifactLoadouts, getUserArtifactLoadout, createArtifactLoadout, updateArtifactLoadout, deleteArtifactLoadout } from "./services/artifactLoadoutService.ts";
 import { getUserLoadouts, getUserLoadout, createLoadout, updateLoadout, deleteLoadout } from "./services/loadoutService.ts";
+import { validateCharacter, validateCharacterUpdate } from "./validators/characterValidator.ts";
+import { validateWeapon, validateWeaponUpdate } from "./validators/weaponValidator.ts";
+import { validateArtifact, validateArtifactUpdate } from "./validators/artifactValidator.ts";
+import { ReferenceValidationError } from "./services/serviceError.ts";
+import { validateArtifactLoadout, validateArtifactLoadoutUpdate } from "./validators/artifactLoadoutValidator.ts";
 
 const CURRENT_USER_ID = 1;
 
@@ -144,6 +149,23 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
+          const errors = validateArtifactLoadout(data);
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Datos inválidos",
+                  details: errors,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           const artifactLoadout = await createArtifactLoadout(
             CURRENT_USER_ID,
             data,
@@ -201,21 +223,28 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
+          const errors = validateArtifactLoadoutUpdate(data);
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Datos inválidos",
+                  details: errors,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           const artifactLoadout = await updateArtifactLoadout(
             id,
             CURRENT_USER_ID,
             data,
           );
-
-          if (!artifactLoadout) {
-            res.writeHead(404);
-            res.end(
-              JSON.stringify({
-                error: "ArtifactLoadout no encontrado",
-              }),
-            );
-            return;
-          }
 
           res.writeHead(200);
           res.end(JSON.stringify({ artifactLoadout }, null, 2));
@@ -740,6 +769,19 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
+          const errors = validateCharacter(data);
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify({
+                error: "Datos inválidos",
+                details: errors,
+              }, null, 2),
+            );
+            return;
+          }
+
           const character = await createCharacter(CURRENT_USER_ID, data);
 
           if (!character) {
@@ -754,12 +796,31 @@ const server = createServer(async (req, res) => {
 
           res.writeHead(201);
           res.end(JSON.stringify({ character }, null, 2));
-        } catch {
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           res.writeHead(400);
           res.end(
-            JSON.stringify({
-              error: "JSON inválido",
-            }),
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
           );
         }
       });
@@ -768,8 +829,10 @@ const server = createServer(async (req, res) => {
     }
 
     /* === PUT /api/user/characters/:id === */
+
     if (
-      req.method === "PUT" && url.pathname.match(/^\/api\/user\/characters\/([^/]+)$/)
+      req.method === "PUT" &&
+      url.pathname.match(/^\/api\/user\/characters\/([^/]+)$/)
     ) {
       const characterId = url.pathname.match(
         /^\/api\/user\/characters\/([^/]+)$/,
@@ -777,7 +840,11 @@ const server = createServer(async (req, res) => {
 
       if (!characterId) {
         res.writeHead(400);
-        res.end(JSON.stringify({ error: "ID de character inválido" }));
+        res.end(
+          JSON.stringify({
+            error: "ID de character inválido",
+          }, null, 2),
+        );
         return;
       }
 
@@ -785,7 +852,11 @@ const server = createServer(async (req, res) => {
 
       if (!Number.isInteger(id)) {
         res.writeHead(400);
-        res.end(JSON.stringify({ error: "ID de character inválido" }));
+        res.end(
+          JSON.stringify({
+            error: "ID de character inválido",
+          }, null, 2),
+        );
         return;
       }
 
@@ -799,19 +870,67 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
-          const character = await updateCharacter(id, CURRENT_USER_ID, data);
+          const errors = validateCharacterUpdate(data);
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify({
+                error: "Datos inválidos",
+                details: errors,
+              }, null, 2),
+            );
+            return;
+          }
+
+          const character = await updateCharacter(
+            id,
+            CURRENT_USER_ID,
+            data,
+          );
 
           if (!character) {
             res.writeHead(404);
-            res.end(JSON.stringify({ error: "Character no encontrado" }));
+            res.end(
+              JSON.stringify({
+                error: "Character no encontrado",
+              }, null, 2),
+            );
             return;
           }
 
           res.writeHead(200);
-          res.end(JSON.stringify({ character }, null, 2));
-        } catch {
+          res.end(
+            JSON.stringify({
+              character,
+            }, null, 2),
+          );
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           res.writeHead(400);
-          res.end(JSON.stringify({ error: "JSON inválido" }));
+          res.end(
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
+          );
         }
       });
 
@@ -900,6 +1019,7 @@ const server = createServer(async (req, res) => {
     }
 
     /* === POST /api/user/weapons === */
+
     if (req.method === "POST" && url.pathname === "/api/user/weapons") {
       let body = "";
 
@@ -911,6 +1031,19 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
+          const errors = validateWeapon(data);
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify({
+                error: "Datos inválidos",
+                details: errors,
+              }, null, 2),
+            );
+            return;
+          }
+
           const weapon = await createWeapon(
             CURRENT_USER_ID,
             data,
@@ -918,12 +1051,31 @@ const server = createServer(async (req, res) => {
 
           res.writeHead(201);
           res.end(JSON.stringify({ weapon }, null, 2));
-        } catch {
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           res.writeHead(400);
           res.end(
-            JSON.stringify({
-              error: "JSON inválido",
-            }),
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
           );
         }
       });
@@ -942,7 +1094,11 @@ const server = createServer(async (req, res) => {
 
       if (!weaponId) {
         res.writeHead(400);
-        res.end(JSON.stringify({ error: "ID de arma inválido" }));
+        res.end(
+          JSON.stringify({
+            error: "ID de arma inválido",
+          }, null, 2),
+        );
         return;
       }
 
@@ -950,7 +1106,11 @@ const server = createServer(async (req, res) => {
 
       if (!Number.isInteger(id)) {
         res.writeHead(400);
-        res.end(JSON.stringify({ error: "ID de arma inválido" }));
+        res.end(
+          JSON.stringify({
+            error: "ID de arma inválido",
+          }, null, 2),
+        );
         return;
       }
 
@@ -964,6 +1124,19 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
+          const errors = validateWeaponUpdate(data);
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify({
+                error: "Datos inválidos",
+                details: errors,
+              }, null, 2),
+            );
+            return;
+          }
+
           const weapon = await updateWeapon(
             id,
             CURRENT_USER_ID,
@@ -975,19 +1148,42 @@ const server = createServer(async (req, res) => {
             res.end(
               JSON.stringify({
                 error: "Arma no encontrada",
-              }),
+              }, null, 2),
             );
             return;
           }
 
           res.writeHead(200);
-          res.end(JSON.stringify({ weapon }, null, 2));
-        } catch {
-          res.writeHead(400);
           res.end(
             JSON.stringify({
-              error: "JSON inválido",
-            }),
+              weapon,
+            }, null, 2),
+          );
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
+          res.writeHead(400);
+          res.end(
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
           );
         }
       });
@@ -1095,19 +1291,61 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
+          const errors = validateArtifact(data);
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Datos inválidos",
+                  details: errors,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           const artifact = await createArtifact(
             CURRENT_USER_ID,
             data,
           );
 
           res.writeHead(201);
-          res.end(JSON.stringify({ artifact }, null, 2));
-        } catch {
+          res.end(
+            JSON.stringify(
+              { artifact },
+              null,
+              2,
+            ),
+          );
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           res.writeHead(400);
           res.end(
-            JSON.stringify({
-              error: "JSON inválido",
-            }),
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
           );
         }
       });
@@ -1126,7 +1364,15 @@ const server = createServer(async (req, res) => {
 
       if (!artifactId) {
         res.writeHead(400);
-        res.end(JSON.stringify({ error: "ID de artefacto inválido" }));
+        res.end(
+          JSON.stringify(
+            {
+              error: "ID de artefacto inválido",
+            },
+            null,
+            2,
+          ),
+        );
         return;
       }
 
@@ -1134,7 +1380,15 @@ const server = createServer(async (req, res) => {
 
       if (!Number.isInteger(id)) {
         res.writeHead(400);
-        res.end(JSON.stringify({ error: "ID de artefacto inválido" }));
+        res.end(
+          JSON.stringify(
+            {
+              error: "ID de artefacto inválido",
+            },
+            null,
+            2,
+          ),
+        );
         return;
       }
 
@@ -1148,6 +1402,23 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
+          const errors = validateArtifactUpdate(data);
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Datos inválidos",
+                  details: errors,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           const artifact = await updateArtifact(
             id,
             CURRENT_USER_ID,
@@ -1157,21 +1428,50 @@ const server = createServer(async (req, res) => {
           if (!artifact) {
             res.writeHead(404);
             res.end(
-              JSON.stringify({
-                error: "Artefacto no encontrado",
-              }),
+              JSON.stringify(
+                {
+                  error: "Artefacto no encontrado",
+                },
+                null,
+                2,
+              ),
             );
             return;
           }
 
           res.writeHead(200);
-          res.end(JSON.stringify({ artifact }, null, 2));
-        } catch {
+          res.end(
+            JSON.stringify(
+              { artifact },
+              null,
+              2,
+            ),
+          );
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           res.writeHead(400);
           res.end(
-            JSON.stringify({
-              error: "JSON inválido",
-            }),
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
           );
         }
       });
@@ -1258,13 +1558,30 @@ const server = createServer(async (req, res) => {
     }
 
   } catch (error) {
-    console.error(error);
+    if (error instanceof ReferenceValidationError) {
+      res.writeHead(400);
+      res.end(
+        JSON.stringify(
+          {
+            error: "Referencia inválida",
+            details: error.details,
+          },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
 
-    res.writeHead(500);
+    res.writeHead(400);
     res.end(
-      JSON.stringify({
-        error: "Error al consultar la base de datos",
-      }),
+      JSON.stringify(
+        {
+          error: "JSON inválido",
+        },
+        null,
+        2,
+      ),
     );
   }
 });

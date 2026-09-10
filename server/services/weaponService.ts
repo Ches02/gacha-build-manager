@@ -1,4 +1,5 @@
 import { prisma } from "../../src/lib/prisma.ts";
+import { ReferenceValidationError } from "./serviceError.ts";
 
 const WEAPON_BASE_STAT_TYPE = "atk";
 
@@ -214,6 +215,18 @@ export async function createWeapon(
     refinement: number;
   },
 ) {
+  const definition = await prisma.weaponDefinition.findUnique({
+    where: {
+      key: data.definitionKey,
+    },
+  });
+
+  if (!definition) {
+    throw new ReferenceValidationError([
+      "definitionKey no corresponde a un arma existente",
+    ]);
+  }
+
   return prisma.weapon.create({
     data: {
       userId,
@@ -246,6 +259,20 @@ export async function updateWeapon(
   if (!weapon) {
     return null;
   }
+
+  if (data.definitionKey !== undefined) {
+  const definition = await prisma.weaponDefinition.findUnique({
+    where: {
+      key: data.definitionKey,
+    },
+  });
+
+  if (!definition) {
+    throw new ReferenceValidationError([
+      "definitionKey no corresponde a un arma existente",
+    ]);
+  }
+}
 
   return prisma.weapon.update({
     where: {

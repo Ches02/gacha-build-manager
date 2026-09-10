@@ -1,4 +1,5 @@
 import { prisma } from "../../src/lib/prisma.ts";
+import { ReferenceValidationError } from "./serviceError.ts";
 
 /* =========================
    USER ARTIFACTS
@@ -44,6 +45,83 @@ export async function createArtifact(
     }[];
   },
 ) {
+  const errors: string[] = [];
+
+  const artifactSet = await prisma.artifactSetDefinition.findUnique({
+    where: {
+      key: data.setKey,
+    },
+  });
+
+  if (!artifactSet) {
+    errors.push(
+      "setKey no corresponde a un set de artefactos existente",
+    );
+  }
+
+  const artifactSlot = await prisma.artifactSlot.findUnique({
+    where: {
+      key: data.slotKey,
+    },
+  });
+
+  if (!artifactSlot) {
+    errors.push(
+      "slotKey no corresponde a un slot de artefacto existente",
+    );
+  }
+
+  const mainStat = await prisma.statType.findUnique({
+    where: {
+      key: data.mainStatTypeKey,
+    },
+  });
+
+  if (!mainStat) {
+    errors.push(
+      "mainStatTypeKey no corresponde a un stat existente",
+    );
+  }
+
+  if (data.subStats) {
+    const uniqueStatKeys = [
+      ...new Set(
+        data.subStats.map(
+          (subStat) => subStat.statTypeKey,
+        ),
+      ),
+    ];
+
+    const subStatDefinitions =
+      await prisma.statType.findMany({
+        where: {
+          key: {
+            in: uniqueStatKeys,
+          },
+        },
+      });
+
+    const existingKeys = new Set(
+      subStatDefinitions.map(
+        (stat) => stat.key,
+      ),
+    );
+
+    data.subStats.forEach(
+      (subStat, index) => {
+        if (!existingKeys.has(subStat.statTypeKey)) {
+          errors.push(
+            `subStats[${index}].statTypeKey no corresponde a un stat existente`,
+          );
+        }
+      },
+    );
+  }
+
+  if (errors.length > 0) {
+    throw new ReferenceValidationError(errors);
+  }
+
   return prisma.artifact.create({
     data: {
       userId,
@@ -55,11 +133,11 @@ export async function createArtifact(
 
       subStats: data.subStats
         ? {
-            create: data.subStats.map((subStat) => ({
-              statTypeKey: subStat.statTypeKey,
-              value: subStat.value,
-            })),
-          }
+          create: data.subStats.map((subStat) => ({
+            statTypeKey: subStat.statTypeKey,
+            value: subStat.value,
+          })),
+        }
         : undefined,
     },
     include: {
@@ -92,6 +170,92 @@ export async function updateArtifact(
 
   if (!artifact) {
     return null;
+  }
+
+  const errors: string[] = [];
+
+  if (data.setKey !== undefined) {
+    const artifactSet =
+      await prisma.artifactSetDefinition.findUnique({
+        where: {
+          key: data.setKey,
+        },
+      });
+
+    if (!artifactSet) {
+      errors.push(
+        "setKey no corresponde a un set de artefactos existente",
+      );
+    }
+  }
+
+  if (data.slotKey !== undefined) {
+    const artifactSlot =
+      await prisma.artifactSlot.findUnique({
+        where: {
+          key: data.slotKey,
+        },
+      });
+
+    if (!artifactSlot) {
+      errors.push(
+        "slotKey no corresponde a un slot de artefacto existente",
+      );
+    }
+  }
+
+  if (data.mainStatTypeKey !== undefined) {
+    const mainStat =
+      await prisma.statType.findUnique({
+        where: {
+          key: data.mainStatTypeKey,
+        },
+      });
+
+    if (!mainStat) {
+      errors.push(
+        "mainStatTypeKey no corresponde a un stat existente",
+      );
+    }
+  }
+
+  if (data.subStats !== undefined) {
+    const uniqueStatKeys = [
+      ...new Set(
+        data.subStats.map(
+          (subStat) => subStat.statTypeKey,
+        ),
+      ),
+    ];
+
+    const subStatDefinitions =
+      await prisma.statType.findMany({
+        where: {
+          key: {
+            in: uniqueStatKeys,
+          },
+        },
+      });
+
+    const existingKeys = new Set(
+      subStatDefinitions.map(
+        (stat) => stat.key,
+      ),
+    );
+
+    data.subStats.forEach(
+      (subStat, index) => {
+        if (!existingKeys.has(subStat.statTypeKey)) {
+          errors.push(
+            `subStats[${index}].statTypeKey no corresponde a un stat existente`,
+          );
+        }
+      },
+    );
+  }
+
+  if (errors.length > 0) {
+    throw new ReferenceValidationError(errors);
   }
 
   return prisma.$transaction(async (transaction) => {
