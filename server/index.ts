@@ -12,7 +12,7 @@ import { validateArtifact, validateArtifactUpdate } from "./validators/artifactV
 import { ReferenceValidationError } from "./services/serviceError.ts";
 import { validateArtifactLoadout, validateArtifactLoadoutUpdate } from "./validators/artifactLoadoutValidator.ts";
 import { validateBuildGuide, validateBuildGuideUpdate } from "./validators/buildGuideValidator.ts";
-
+import { validateLoadout, validateLoadoutUpdate } from "./validators/loadoutValidator.ts";
 const CURRENT_USER_ID = 1;
 
 const server = createServer(async (req, res) => {
@@ -419,6 +419,25 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
+          const errors = validateLoadout(
+            data,
+          );
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Datos inválidos",
+                  details: errors,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           const loadout = await createLoadout(
             CURRENT_USER_ID,
             data,
@@ -426,9 +445,32 @@ const server = createServer(async (req, res) => {
 
           res.writeHead(201);
           res.end(JSON.stringify(loadout));
-        } catch {
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           res.writeHead(400);
-          res.end(JSON.stringify({ error: "JSON inválido" }));
+          res.end(
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
+          );
         }
       });
 
@@ -441,12 +483,16 @@ const server = createServer(async (req, res) => {
       url.pathname.match(/^\/api\/user\/loadouts\/[^/]+$/)
     ) {
       const idMatch = url.pathname.match(
-        /^\/api\/user\/loadouts\/([^/]+)$/,
+        /^\/api\/user\/loadouts\/([^/]+)$/
       );
 
       if (!idMatch) {
         res.writeHead(404);
-        res.end(JSON.stringify({ error: "Loadout no encontrado" }));
+        res.end(
+          JSON.stringify({
+            error: "Loadout no encontrado",
+          })
+        );
         return;
       }
 
@@ -454,7 +500,11 @@ const server = createServer(async (req, res) => {
 
       if (!Number.isInteger(id)) {
         res.writeHead(400);
-        res.end(JSON.stringify({ error: "ID inválido" }));
+        res.end(
+          JSON.stringify({
+            error: "ID inválido",
+          })
+        );
         return;
       }
 
@@ -468,6 +518,25 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
+          const errors = validateLoadoutUpdate(
+            data,
+          );
+
+          if (errors.length > 0) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Datos inválidos",
+                  details: errors,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           const loadout = await updateLoadout(
             id,
             CURRENT_USER_ID,
@@ -476,15 +545,42 @@ const server = createServer(async (req, res) => {
 
           if (!loadout) {
             res.writeHead(404);
-            res.end(JSON.stringify({ error: "Loadout no encontrado" }));
+            res.end(
+              JSON.stringify({
+                error: "Loadout no encontrado",
+              })
+            );
             return;
           }
 
           res.writeHead(200);
           res.end(JSON.stringify(loadout));
-        } catch {
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           res.writeHead(400);
-          res.end(JSON.stringify({ error: "JSON inválido" }));
+          res.end(
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
+          );
         }
       });
 

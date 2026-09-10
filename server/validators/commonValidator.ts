@@ -55,6 +55,44 @@ export function validateText(
 }
 
 /* =========================
+   OPTIONAL TEXT VALIDATOR
+   ========================= */
+
+export function validateOptionalText(
+  value: unknown,
+  fieldName: string,
+  maxLength: number,
+): string | null {
+  // undefined = campo no enviado
+  if (value === undefined) {
+    return null;
+  }
+
+  // null = campo enviado explícitamente como null
+  if (value === null) {
+    return null;
+  }
+
+  if (typeof value !== "string") {
+    return `${fieldName} debe ser un texto`;
+  }
+
+  if (value.length > maxLength) {
+    return `${fieldName} no puede superar los ${maxLength} caracteres`;
+  }
+
+  if (FORBIDDEN_CHARACTERS.test(value)) {
+    return `${fieldName} contiene caracteres no permitidos`;
+  }
+
+  if (CONTROL_CHARACTERS.test(value)) {
+    return `${fieldName} contiene caracteres no permitidos`;
+  }
+
+  return null;
+}
+
+/* =========================
    INTEGER
    ========================= */
 
