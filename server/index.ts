@@ -11,6 +11,7 @@ import { validateWeapon, validateWeaponUpdate } from "./validators/weaponValidat
 import { validateArtifact, validateArtifactUpdate } from "./validators/artifactValidator.ts";
 import { ReferenceValidationError } from "./services/serviceError.ts";
 import { validateArtifactLoadout, validateArtifactLoadoutUpdate } from "./validators/artifactLoadoutValidator.ts";
+import { validateBuildGuide, validateBuildGuideUpdate } from "./validators/buildGuideValidator.ts";
 
 const CURRENT_USER_ID = 1;
 
@@ -173,12 +174,31 @@ const server = createServer(async (req, res) => {
 
           res.writeHead(201);
           res.end(JSON.stringify({ artifactLoadout }, null, 2));
-        } catch {
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           res.writeHead(400);
           res.end(
-            JSON.stringify({
-              error: "JSON inválido",
-            }),
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
           );
         }
       });
@@ -248,12 +268,31 @@ const server = createServer(async (req, res) => {
 
           res.writeHead(200);
           res.end(JSON.stringify({ artifactLoadout }, null, 2));
-        } catch {
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
           res.writeHead(400);
           res.end(
-            JSON.stringify({
-              error: "JSON inválido",
-            }),
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
           );
         }
       });
@@ -569,19 +608,69 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
-          const buildGuide = await createBuildGuide(
-            CURRENT_USER_ID,
-            data,
-          );
+          const validationErrors =
+            validateBuildGuide(data);
+
+          if (validationErrors.length > 0) {
+            res.writeHead(400);
+
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Datos inválidos",
+                  details: validationErrors,
+                },
+                null,
+                2,
+              ),
+            );
+
+            return;
+          }
+
+          const buildGuide =
+            await createBuildGuide(
+              CURRENT_USER_ID,
+              data,
+            );
 
           res.writeHead(201);
-          res.end(JSON.stringify({ buildGuide }, null, 2));
-        } catch {
-          res.writeHead(400);
+
           res.end(
-            JSON.stringify({
-              error: "JSON inválido",
-            }),
+            JSON.stringify(
+              { buildGuide },
+              null,
+              2,
+            ),
+          );
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+
+            return;
+          }
+
+          res.writeHead(400);
+
+          res.end(
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
           );
         }
       });
@@ -592,19 +681,24 @@ const server = createServer(async (req, res) => {
     /* === PUT /api/user/build-guides/:id === */
     if (
       req.method === "PUT" &&
-      url.pathname.match(/^\/api\/user\/build-guides\/([^/]+)$/)
-    ) {
-      const buildGuideId = url.pathname.match(
+      url.pathname.match(
         /^\/api\/user\/build-guides\/([^/]+)$/,
-      );
+      )
+    ) {
+      const buildGuideId =
+        url.pathname.match(
+          /^\/api\/user\/build-guides\/([^/]+)$/,
+        );
 
       if (!buildGuideId) {
         res.writeHead(400);
+
         res.end(
           JSON.stringify({
             error: "ID de build guide inválido",
           }),
         );
+
         return;
       }
 
@@ -612,11 +706,13 @@ const server = createServer(async (req, res) => {
 
       if (!Number.isInteger(id)) {
         res.writeHead(400);
+
         res.end(
           JSON.stringify({
             error: "ID de build guide inválido",
           }),
         );
+
         return;
       }
 
@@ -630,30 +726,82 @@ const server = createServer(async (req, res) => {
         try {
           const data = JSON.parse(body);
 
-          const buildGuide = await updateBuildGuide(
-            id,
-            CURRENT_USER_ID,
-            data,
-          );
+          const validationErrors =
+            validateBuildGuideUpdate(data);
+
+          if (validationErrors.length > 0) {
+            res.writeHead(400);
+
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Datos inválidos",
+                  details: validationErrors,
+                },
+                null,
+                2,
+              ),
+            );
+
+            return;
+          }
+
+          const buildGuide =
+            await updateBuildGuide(
+              id,
+              CURRENT_USER_ID,
+              data,
+            );
 
           if (!buildGuide) {
             res.writeHead(404);
+
             res.end(
               JSON.stringify({
                 error: "BuildGuide no encontrado",
               }),
             );
+
             return;
           }
 
           res.writeHead(200);
-          res.end(JSON.stringify({ buildGuide }, null, 2));
-        } catch {
-          res.writeHead(400);
+
           res.end(
-            JSON.stringify({
-              error: "JSON inválido",
-            }),
+            JSON.stringify(
+              { buildGuide },
+              null,
+              2,
+            ),
+          );
+        } catch (error) {
+          if (error instanceof ReferenceValidationError) {
+            res.writeHead(400);
+
+            res.end(
+              JSON.stringify(
+                {
+                  error: "Referencia inválida",
+                  details: error.details,
+                },
+                null,
+                2,
+              ),
+            );
+
+            return;
+          }
+
+          res.writeHead(400);
+
+          res.end(
+            JSON.stringify(
+              {
+                error: "JSON inválido",
+              },
+              null,
+              2,
+            ),
           );
         }
       });

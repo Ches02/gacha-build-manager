@@ -1,4 +1,45 @@
 import { prisma } from "../../src/lib/prisma.ts";
+import { ReferenceValidationError } from "./serviceError.ts";
+
+async function validateArtifactReferences(
+  artifactIds: number[],
+  userId: number,
+) {
+  if (artifactIds.length === 0) {
+    return;
+  }
+
+  const uniqueArtifactIds = [...new Set(artifactIds)];
+
+  const artifacts = await prisma.artifact.findMany({
+    where: {
+      id: {
+        in: uniqueArtifactIds,
+      },
+      userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  const validIds = new Set(
+    artifacts.map((artifact) => artifact.id),
+  );
+
+  const missingIds = uniqueArtifactIds.filter(
+    (artifactId) => !validIds.has(artifactId),
+  );
+
+  if (missingIds.length > 0) {
+    throw new ReferenceValidationError(
+      missingIds.map(
+        (artifactId) =>
+          `artifactIds contiene un ID que no corresponde a un artefacto del usuario actual: ${artifactId}`,
+      ),
+    );
+  }
+}
 
 /* =========================
    USER ARTIFACT LOADOUTS
@@ -52,6 +93,10 @@ export async function createArtifactLoadout(
     artifactIds?: number[];
   },
 ) {
+  await validateArtifactReferences(
+    data.artifactIds ?? [],
+    userId,
+  );
   return prisma.artifactLoadout.create({
     data: {
       userId,
@@ -59,10 +104,10 @@ export async function createArtifactLoadout(
       description: data.description,
       artifacts: data.artifactIds
         ? {
-            create: data.artifactIds.map((artifactId) => ({
-              artifactId,
-            })),
-          }
+          create: data.artifactIds.map((artifactId) => ({
+            artifactId,
+          })),
+        }
         : undefined,
     },
     include: {
@@ -96,6 +141,13 @@ export async function updateArtifactLoadout(
   });
 
   if (!artifactLoadout) return null;
+
+  if (data.artifactIds !== undefined) {
+  await validateArtifactReferences(
+    data.artifactIds,
+    userId,
+  );
+}
 
   return prisma.$transaction(async (transaction) => {
     if (data.artifactIds !== undefined) {

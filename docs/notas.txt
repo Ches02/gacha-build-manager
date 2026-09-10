@@ -11,7 +11,7 @@ Comandos útiles
     ├── git add .
     ├── git commit -m "Text"        
     └── git ignore file.extension       
-    
+
 
 Pendiente
     └──llenado de BD
@@ -62,16 +62,6 @@ Build Guides
 User Loadouts
 	└── POST	
 	└── PUT	
-
-
-
-
-
-
-
-
-   
-
 
 
 
