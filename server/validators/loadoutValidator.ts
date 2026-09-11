@@ -1,4 +1,10 @@
-import { validateText, validateOptionalText, validateOptionalId } from "./commonValidator.ts";
+import {
+    validateId,
+    validateIdArray,
+    validateOptionalId,
+    validateOptionalText,
+    validateText,
+} from "./commonValidator.ts";
 
 /* =========================
    CREATE LOADOUT
@@ -29,16 +35,13 @@ export function validateLoadout(
         errors.push(descriptionError);
     }
 
-    if (data.characterId !== undefined) {
-        const characterIdError =
-            validateOptionalId(
-                data.characterId,
-                "characterId",
-            );
+    const characterIdError = validateId(
+        data.characterId,
+        "characterId",
+    );
 
-        if (characterIdError) {
-            errors.push(characterIdError);
-        }
+    if (characterIdError) {
+        errors.push(characterIdError);
     }
 
     if (data.weaponId !== undefined) {
@@ -69,16 +72,20 @@ export function validateLoadout(
         }
     }
 
-    if (data.buildGuideId !== undefined) {
-        const buildGuideIdError =
-            validateOptionalId(
-                data.buildGuideId,
-                "buildGuideId",
-            );
+    if (data.buildGuideIds !== undefined) {
+        errors.push(
+            ...validateIdArray(
+                data.buildGuideIds,
+                "buildGuideIds",
+            ),
+        );
 
-        if (buildGuideIdError) {
+        if (
+            Array.isArray(data.buildGuideIds) &&
+            new Set(data.buildGuideIds).size !== data.buildGuideIds.length
+        ) {
             errors.push(
-                buildGuideIdError,
+                "buildGuideIds no puede contener IDs repetidos",
             );
         }
     }
@@ -119,7 +126,7 @@ export function validateLoadoutUpdate(
 
     if (data.characterId !== undefined) {
         const characterIdError =
-            validateOptionalId(
+            validateId(
                 data.characterId,
                 "characterId",
             );
@@ -157,16 +164,20 @@ export function validateLoadoutUpdate(
         }
     }
 
-    if (data.buildGuideId !== undefined) {
-        const buildGuideIdError =
-            validateOptionalId(
-                data.buildGuideId,
-                "buildGuideId",
-            );
+    if (data.buildGuideIds !== undefined) {
+        errors.push(
+            ...validateIdArray(
+                data.buildGuideIds,
+                "buildGuideIds",
+            ),
+        );
 
-        if (buildGuideIdError) {
+        if (
+            Array.isArray(data.buildGuideIds) &&
+            new Set(data.buildGuideIds).size !== data.buildGuideIds.length
+        ) {
             errors.push(
-                buildGuideIdError,
+                "buildGuideIds no puede contener IDs repetidos",
             );
         }
     }

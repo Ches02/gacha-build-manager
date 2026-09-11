@@ -38,7 +38,11 @@ export async function getUserLoadouts(userId: number) {
         },
       },
 
-      buildGuide: true,
+      buildGuides: {
+        include: {
+          buildGuide: true,
+        },
+      },
     },
   });
 
@@ -186,13 +190,11 @@ export async function getUserLoadouts(userId: number) {
       }
       : null,
 
-    buildGuide: loadout.buildGuide
-      ? {
-        id: loadout.buildGuide.id,
-        name: loadout.buildGuide.name,
-        description: loadout.buildGuide.description,
-      }
-      : null,
+    buildGuides: loadout.buildGuides.map((link) => ({
+      id: link.buildGuide.id,
+      name: link.buildGuide.name,
+      description: link.buildGuide.description,
+    })),
   }));
 }
 
@@ -233,7 +235,11 @@ export async function getUserLoadout(
         },
       },
 
-      buildGuide: true,
+      buildGuides: {
+        include: {
+          buildGuide: true,
+        },
+      },
     },
   });
 
@@ -385,13 +391,11 @@ export async function getUserLoadout(
       }
       : null,
 
-    buildGuide: loadout.buildGuide
-      ? {
-        id: loadout.buildGuide.id,
-        name: loadout.buildGuide.name,
-        description: loadout.buildGuide.description,
-      }
-      : null,
+    buildGuides: loadout.buildGuides.map((link) => ({
+      id: link.buildGuide.id,
+      name: link.buildGuide.name,
+      description: link.buildGuide.description,
+    })),
   };
 }
 
@@ -402,15 +406,15 @@ export async function getUserLoadout(
 async function validateLoadoutReferences(
   userId: number,
   data: {
-    characterId?: number | null;
+    characterId?: number;
     weaponId?: number | null;
     artifactLoadoutId?: number | null;
-    buildGuideId?: number | null;
+    buildGuideIds?: number[];
   },
 ) {
   const errors: string[] = [];
 
-  if (data.characterId !== undefined && data.characterId !== null) {
+  if (data.characterId !== undefined) {
     const character = await prisma.character.findFirst({
       where: {
         id: data.characterId,
@@ -468,13 +472,12 @@ async function validateLoadoutReferences(
     }
   }
 
-  if (
-    data.buildGuideId !== undefined &&
-    data.buildGuideId !== null
-  ) {
-    const buildGuide = await prisma.buildGuide.findFirst({
+  if (data.buildGuideIds !== undefined) {
+    const buildGuides = await prisma.buildGuide.findMany({
       where: {
-        id: data.buildGuideId,
+        id: {
+          in: data.buildGuideIds,
+        },
         userId,
       },
       select: {
@@ -482,11 +485,17 @@ async function validateLoadoutReferences(
       },
     });
 
-    if (!buildGuide) {
-      errors.push(
-        "buildGuideId no existe o no pertenece al usuario",
-      );
-    }
+    const existingBuildGuideIds = new Set(
+      buildGuides.map((buildGuide) => buildGuide.id),
+    );
+
+    data.buildGuideIds.forEach((buildGuideId, index) => {
+      if (!existingBuildGuideIds.has(buildGuideId)) {
+        errors.push(
+          `buildGuideIds[${index}] no existe o no pertenece al usuario`,
+        );
+      }
+    });
   }
 
   if (errors.length > 0) {
@@ -503,10 +512,10 @@ export async function createLoadout(
   data: {
     name: string;
     description?: string;
-    characterId?: number | null;
+    characterId: number;
     weaponId?: number | null;
     artifactLoadoutId?: number | null;
-    buildGuideId?: number | null;
+    buildGuideIds?: number[];
   },
 ) {
   await validateLoadoutReferences(
@@ -519,10 +528,16 @@ export async function createLoadout(
       userId,
       name: data.name,
       description: data.description ?? null,
-      characterId: data.characterId ?? null,
+      characterId: data.characterId,
       weaponId: data.weaponId ?? null,
       artifactLoadoutId: data.artifactLoadoutId ?? null,
-      buildGuideId: data.buildGuideId ?? null,
+      ...(data.buildGuideIds !== undefined && {
+        buildGuides: {
+          create: data.buildGuideIds.map((buildGuideId) => ({
+            buildGuideId,
+          })),
+        },
+      }),
     },
   });
 
@@ -539,10 +554,10 @@ export async function updateLoadout(
   data: {
     name?: string;
     description?: string | null;
-    characterId?: number | null;
+    characterId?: number;
     weaponId?: number | null;
     artifactLoadoutId?: number | null;
-    buildGuideId?: number | null;
+    buildGuideIds?: number[];
   },
 ) {
   const existingLoadout = await prisma.loadout.findFirst({
@@ -586,8 +601,13 @@ export async function updateLoadout(
         artifactLoadoutId: data.artifactLoadoutId,
       }),
 
-      ...(data.buildGuideId !== undefined && {
-        buildGuideId: data.buildGuideId,
+      ...(data.buildGuideIds !== undefined && {
+        buildGuides: {
+          deleteMany: {},
+          create: data.buildGuideIds.map((buildGuideId) => ({
+            buildGuideId,
+          })),
+        },
       }),
     },
   });

@@ -36,7 +36,7 @@ model Character {
   elementalBurstLevel Int
   definition          CharacterDefinition @relation(fields: [definitionKey], references: [key])
   loadouts            Loadout[]
-  user                User               @relation(fields: [userId], references: [id])
+  user                User                @relation(fields: [userId], references: [id])
 }
 
 model WeaponDefinition {
@@ -60,7 +60,7 @@ model Weapon {
   definition    WeaponDefinition @relation(fields: [definitionKey], references: [key])
   loadouts      Loadout[]
   userId        Int
-  user          User            @relation(fields: [userId], references: [id])
+  user          User             @relation(fields: [userId], references: [id])
 }
 
 model ArtifactSetDefinition {
@@ -82,7 +82,7 @@ model Artifact {
   subStats         ArtifactSubStat[]
   artifactLoadouts ArtifactLoadoutItem[]
   userId           Int
-  user             User                 @relation(fields: [userId], references: [id])
+  user             User                  @relation(fields: [userId], references: [id])
 }
 
 model ArtifactSubStat {
@@ -135,9 +135,9 @@ model BuildGuide {
   artifactSets   BuildGuideArtifactSet[]
   mainStats      BuildGuideMainStat[]
   statPriorities BuildGuideStatPriority[]
-  loadouts       Loadout[]
+  loadoutLinks   LoadoutBuildGuide[]
   userId         Int
-  user           User                    @relation(fields: [userId], references: [id])
+  user           User                     @relation(fields: [userId], references: [id])
 }
 
 model BuildGuideCharacter {
@@ -198,7 +198,7 @@ model ArtifactLoadout {
   artifacts   ArtifactLoadoutItem[]
   loadouts    Loadout[]
   userId      Int
-  user        User                 @relation(fields: [userId], references: [id])
+  user        User                  @relation(fields: [userId], references: [id])
 }
 
 model ArtifactLoadoutItem {
@@ -211,19 +211,27 @@ model ArtifactLoadoutItem {
 }
 
 model Loadout {
-  id                Int              @id @default(autoincrement())
+  id                Int                 @id @default(autoincrement())
   name              String
   description       String?
-  characterId       Int?
+  characterId       Int
   weaponId          Int?
   artifactLoadoutId Int?
-  buildGuideId      Int?
-  character         Character?       @relation(fields: [characterId], references: [id], onDelete: SetNull)
-  weapon            Weapon?          @relation(fields: [weaponId], references: [id], onDelete: SetNull)
-  artifactLoadout   ArtifactLoadout? @relation(fields: [artifactLoadoutId], references: [id], onDelete: SetNull)
-  buildGuide        BuildGuide?      @relation(fields: [buildGuideId], references: [id], onDelete: SetNull)
+  character         Character           @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  weapon            Weapon?             @relation(fields: [weaponId], references: [id], onDelete: SetNull)
+  artifactLoadout   ArtifactLoadout?    @relation(fields: [artifactLoadoutId], references: [id], onDelete: SetNull)
+  buildGuides       LoadoutBuildGuide[]
   userId            Int
-  user              User            @relation(fields: [userId], references: [id])
+  user              User                @relation(fields: [userId], references: [id])
+}
+
+model LoadoutBuildGuide {
+  loadoutId    Int
+  buildGuideId Int
+  loadout      Loadout    @relation(fields: [loadoutId], references: [id], onDelete: Cascade)
+  buildGuide   BuildGuide @relation(fields: [buildGuideId], references: [id], onDelete: Cascade)
+
+  @@id([loadoutId, buildGuideId])
 }
 
 model User {
