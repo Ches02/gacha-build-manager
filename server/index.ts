@@ -2517,8 +2517,37 @@ const server = createServer(async (req, res) => {
       /* === GET /api/weapons === */
 
       case "/api/weapons": {
+        const rarityParam =
+          url.searchParams.get("rarity");
+
+        let rarity: number | undefined;
+
+        if (rarityParam !== null) {
+          rarity = Number(rarityParam);
+
+          if (
+            rarityParam.trim() === "" ||
+            !Number.isInteger(rarity)
+          ) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify({
+                error:
+                  "rarity debe ser un número entero válido",
+              }),
+            );
+            return;
+          }
+        }
+
         const weapons =
-          await getWeapons("es");
+          await getWeapons("es", {
+            rarity,
+            weaponType:
+              url.searchParams.get(
+                "weaponType",
+              ) ?? undefined,
+          });
 
         res.writeHead(200);
         res.end(
@@ -2534,8 +2563,43 @@ const server = createServer(async (req, res) => {
       /* === GET /api/characters === */
 
       case "/api/characters": {
+        const rarityParam =
+          url.searchParams.get("rarity");
+
+        let rarity: number | undefined;
+
+        if (rarityParam !== null) {
+          rarity = Number(rarityParam);
+
+          if (
+            rarityParam.trim() === "" ||
+            !Number.isInteger(rarity)
+          ) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify({
+                error:
+                  "rarity debe ser un número entero válido",
+              }),
+            );
+            return;
+          }
+        }
+
         const characters =
-          await getCharacters("es");
+          await getCharacters("es", {
+            element:
+              url.searchParams.get("element") ??
+              undefined,
+            rarity,
+            weaponType:
+              url.searchParams.get(
+                "weaponType",
+              ) ?? undefined,
+            nation:
+              url.searchParams.get("nation") ??
+              undefined,
+          });
 
         res.writeHead(200);
         res.end(

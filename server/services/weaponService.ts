@@ -3,8 +3,23 @@ import { ReferenceValidationError } from "./serviceError.ts";
 
 const WEAPON_BASE_STAT_TYPE = "atk";
 
-export async function getWeapons(language: string) {
-  const weapons = await prisma.weaponDefinition.findMany();
+export async function getWeapons(
+  language: string,
+  filters?: {
+    rarity?: number;
+    weaponType?: string;
+  },
+) {
+  const weapons = await prisma.weaponDefinition.findMany({
+    where: {
+      ...(filters?.rarity !== undefined && {
+        rarity: filters.rarity,
+      }),
+      ...(filters?.weaponType !== undefined && {
+        weaponTypeKey: filters.weaponType,
+      }),
+    },
+  });
 
   const translations = await prisma.translation.findMany({
     where: {

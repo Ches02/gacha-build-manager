@@ -1,8 +1,31 @@
 import { prisma } from "../../src/lib/prisma.ts";
 import { ReferenceValidationError } from "./serviceError.ts";
 
-export async function getCharacters(language: string) {
-  const characters = await prisma.characterDefinition.findMany();
+export async function getCharacters(
+  language: string,
+  filters?: {
+    element?: string;
+    rarity?: number;
+    weaponType?: string;
+    nation?: string;
+  },
+) {
+  const characters = await prisma.characterDefinition.findMany({
+    where: {
+      ...(filters?.element !== undefined && {
+        element: filters.element,
+      }),
+      ...(filters?.rarity !== undefined && {
+        rarity: filters.rarity,
+      }),
+      ...(filters?.weaponType !== undefined && {
+        weaponTypeKey: filters.weaponType,
+      }),
+      ...(filters?.nation !== undefined && {
+        nation: filters.nation,
+      }),
+    },
+  });
 
   const translations = await prisma.translation.findMany({
     where: {
