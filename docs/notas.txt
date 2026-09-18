@@ -10,7 +10,8 @@ Comandos útiles
     ├── git status
     ├── git add .
     ├── git commit -m "Text"        
-    └── git ignore file.extension       
+    ├── git ignore file.extension
+    └── sqlite3 .\gacha.db
 
 
 Pendiente
@@ -26,7 +27,14 @@ Pendiente
         │
         ├──artifactset Definition
         ├──atifact set translation
-        └──artefacto 3/4 pieces translation
+        ├──artefacto 3/4 pieces translation
+        │
+        ├──materiales
+        ├──traduccion de materiales
+        ├──personajes materiales de ascencion
+        ├──armas materiales de ascencion
+        ├──calendario dominio materiales
+        └──nombres de dominios en translation
 
     └──Autenticación → dejar de usar CURRENT_USER_ID = 1 y preparar usuarios reales.
     └──FrontEnd

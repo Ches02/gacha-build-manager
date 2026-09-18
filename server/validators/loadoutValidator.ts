@@ -1,10 +1,101 @@
 import {
     validateId,
     validateIdArray,
+    validateIntegerRange,
     validateOptionalId,
     validateOptionalText,
     validateText,
 } from "./commonValidator.ts";
+
+/* =========================
+   OPTIONAL TARGETS
+   ========================= */
+
+function validateOptionalTarget(
+    data: Record<string, unknown>,
+    field: string,
+    label: string,
+    min: number,
+    max: number,
+    errors: string[],
+): void {
+    const value = data[field];
+
+    // Si no se envía o es null, se permite.
+    if (value === undefined || value === null) {
+        return;
+    }
+
+    const error = validateIntegerRange(
+        value,
+        label,
+        min,
+        max,
+    );
+
+    if (error) {
+        errors.push(error);
+    }
+}
+
+function validateTargetFields(
+    data: Record<string, unknown>,
+    errors: string[],
+): void {
+    validateOptionalTarget(
+        data,
+        "targetLevel",
+        "Nivel objetivo",
+        1,
+        90,
+        errors,
+    );
+
+    validateOptionalTarget(
+        data,
+        "targetAscension",
+        "Ascensión objetivo",
+        0,
+        6,
+        errors,
+    );
+
+    validateOptionalTarget(
+        data,
+        "targetNormalAttackLevel",
+        "Nivel objetivo de Ataque Normal",
+        1,
+        10,
+        errors,
+    );
+
+    validateOptionalTarget(
+        data,
+        "targetElementalSkillLevel",
+        "Nivel objetivo de Habilidad Elemental",
+        1,
+        10,
+        errors,
+    );
+
+    validateOptionalTarget(
+        data,
+        "targetElementalBurstLevel",
+        "Nivel objetivo de Habilidad Definitiva",
+        1,
+        10,
+        errors,
+    );
+
+    validateOptionalTarget(
+        data,
+        "targetWeaponLevel",
+        "Nivel objetivo del arma",
+        1,
+        90,
+        errors,
+    );
+}
 
 /* =========================
    CREATE LOADOUT
@@ -45,20 +136,17 @@ export function validateLoadout(
     }
 
     if (data.weaponId !== undefined) {
-        const weaponIdError =
-            validateOptionalId(
-                data.weaponId,
-                "weaponId",
-            );
+        const weaponIdError = validateOptionalId(
+            data.weaponId,
+            "weaponId",
+        );
 
         if (weaponIdError) {
             errors.push(weaponIdError);
         }
     }
 
-    if (
-        data.artifactLoadoutId !== undefined
-    ) {
+    if (data.artifactLoadoutId !== undefined) {
         const artifactLoadoutIdError =
             validateOptionalId(
                 data.artifactLoadoutId,
@@ -66,9 +154,7 @@ export function validateLoadout(
             );
 
         if (artifactLoadoutIdError) {
-            errors.push(
-                artifactLoadoutIdError,
-            );
+            errors.push(artifactLoadoutIdError);
         }
     }
 
@@ -82,13 +168,16 @@ export function validateLoadout(
 
         if (
             Array.isArray(data.buildGuideIds) &&
-            new Set(data.buildGuideIds).size !== data.buildGuideIds.length
+            new Set(data.buildGuideIds).size !==
+                data.buildGuideIds.length
         ) {
             errors.push(
                 "buildGuideIds no puede contener IDs repetidos",
             );
         }
     }
+
+    validateTargetFields(data, errors);
 
     return errors;
 }
@@ -125,11 +214,10 @@ export function validateLoadoutUpdate(
     }
 
     if (data.characterId !== undefined) {
-        const characterIdError =
-            validateId(
-                data.characterId,
-                "characterId",
-            );
+        const characterIdError = validateId(
+            data.characterId,
+            "characterId",
+        );
 
         if (characterIdError) {
             errors.push(characterIdError);
@@ -137,20 +225,17 @@ export function validateLoadoutUpdate(
     }
 
     if (data.weaponId !== undefined) {
-        const weaponIdError =
-            validateOptionalId(
-                data.weaponId,
-                "weaponId",
-            );
+        const weaponIdError = validateOptionalId(
+            data.weaponId,
+            "weaponId",
+        );
 
         if (weaponIdError) {
             errors.push(weaponIdError);
         }
     }
 
-    if (
-        data.artifactLoadoutId !== undefined
-    ) {
+    if (data.artifactLoadoutId !== undefined) {
         const artifactLoadoutIdError =
             validateOptionalId(
                 data.artifactLoadoutId,
@@ -158,9 +243,7 @@ export function validateLoadoutUpdate(
             );
 
         if (artifactLoadoutIdError) {
-            errors.push(
-                artifactLoadoutIdError,
-            );
+            errors.push(artifactLoadoutIdError);
         }
     }
 
@@ -174,13 +257,16 @@ export function validateLoadoutUpdate(
 
         if (
             Array.isArray(data.buildGuideIds) &&
-            new Set(data.buildGuideIds).size !== data.buildGuideIds.length
+            new Set(data.buildGuideIds).size !==
+                data.buildGuideIds.length
         ) {
             errors.push(
                 "buildGuideIds no puede contener IDs repetidos",
             );
         }
     }
+
+    validateTargetFields(data, errors);
 
     return errors;
 }

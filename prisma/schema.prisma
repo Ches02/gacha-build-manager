@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -21,6 +19,8 @@ model CharacterDefinition {
   weaponType    WeaponType            @relation(fields: [weaponTypeKey], references: [key])
   characters    Character[]
   buildGuides   BuildGuideCharacter[]
+
+  materials CharacterMaterial?
 }
 
 model Character {
@@ -50,6 +50,8 @@ model WeaponDefinition {
   subStatType    StatType           @relation(fields: [subStatTypeKey], references: [key])
   weapons        Weapon[]
   buildGuides    BuildGuideWeapon[]
+
+  materials WeaponMaterial?
 }
 
 model Weapon {
@@ -211,18 +213,27 @@ model ArtifactLoadoutItem {
 }
 
 model Loadout {
-  id                Int                 @id @default(autoincrement())
+  id                Int     @id @default(autoincrement())
   name              String
   description       String?
   characterId       Int
   weaponId          Int?
   artifactLoadoutId Int?
-  character         Character           @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  weapon            Weapon?             @relation(fields: [weaponId], references: [id], onDelete: SetNull)
-  artifactLoadout   ArtifactLoadout?    @relation(fields: [artifactLoadoutId], references: [id], onDelete: SetNull)
-  buildGuides       LoadoutBuildGuide[]
-  userId            Int
-  user              User                @relation(fields: [userId], references: [id])
+
+  character       Character           @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  weapon          Weapon?             @relation(fields: [weaponId], references: [id], onDelete: SetNull)
+  artifactLoadout ArtifactLoadout?    @relation(fields: [artifactLoadoutId], references: [id], onDelete: SetNull)
+  buildGuides     LoadoutBuildGuide[]
+
+  targetLevel               Int?
+  targetAscension           Int?
+  targetNormalAttackLevel   Int?
+  targetElementalSkillLevel Int?
+  targetElementalBurstLevel Int?
+  targetWeaponLevel         Int?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }
 
 model LoadoutBuildGuide {
@@ -243,4 +254,128 @@ model User {
   artifactLoadouts ArtifactLoadout[]
   buildGuides      BuildGuide[]
   loadouts         Loadout[]
+}
+
+model MaterialDefinition {
+  key     String           @id
+  type    MaterialType
+  sources MaterialSource[]
+
+  characterMaterialBoss       CharacterMaterial[] @relation("CharacterBossMaterial")
+  characterMaterialSpecialty  CharacterMaterial[] @relation("CharacterRegionalSpecialty")
+  characterMaterialCommon     CharacterMaterial[] @relation("CharacterCommonMaterial")
+  characterMaterialTalent     CharacterMaterial[] @relation("CharacterTalentMaterial")
+  characterMaterialWeeklyBoss CharacterMaterial[] @relation("CharacterWeeklyBossMaterial")
+
+  weaponMaterialDomain  WeaponMaterial[] @relation("WeaponDomainMaterial")
+  weaponMaterialCommon1 WeaponMaterial[] @relation("WeaponCommonMaterial1")
+  weaponMaterialCommon2 WeaponMaterial[] @relation("WeaponCommonMaterial2")
+}
+
+model CharacterMaterial {
+  characterDefinitionKey String @id
+
+  bossMaterialKey       String
+  regionalSpecialtyKey  String
+  commonMaterialKey     String
+  talentMaterialKey     String
+  weeklyBossMaterialKey String
+
+  characterDefinition CharacterDefinition @relation(fields: [characterDefinitionKey], references: [key], onDelete: Cascade)
+  bossMaterial        MaterialDefinition  @relation("CharacterBossMaterial", fields: [bossMaterialKey], references: [key])
+  regionalSpecialty   MaterialDefinition  @relation("CharacterRegionalSpecialty", fields: [regionalSpecialtyKey], references: [key])
+  commonMaterial      MaterialDefinition  @relation("CharacterCommonMaterial", fields: [commonMaterialKey], references: [key])
+  talentMaterial      MaterialDefinition  @relation("CharacterTalentMaterial", fields: [talentMaterialKey], references: [key])
+  weeklyBossMaterial  MaterialDefinition  @relation("CharacterWeeklyBossMaterial", fields: [weeklyBossMaterialKey], references: [key])
+}
+
+model WeaponMaterial {
+  weaponDefinitionKey String @id
+  domainMaterialKey   String
+  commonMaterial1Key  String
+  commonMaterial2Key  String
+
+  weaponDefinition WeaponDefinition   @relation(fields: [weaponDefinitionKey], references: [key], onDelete: Cascade)
+  domainMaterial   MaterialDefinition @relation("WeaponDomainMaterial", fields: [domainMaterialKey], references: [key])
+  commonMaterial1  MaterialDefinition @relation("WeaponCommonMaterial1", fields: [commonMaterial1Key], references: [key])
+  commonMaterial2  MaterialDefinition @relation("WeaponCommonMaterial2", fields: [commonMaterial2Key], references: [key])
+}
+
+model AscensionRequirement {
+  id        Int @id @default(autoincrement())
+  ascension Int @unique
+
+  gemQuantity Int
+  gemQuality  Int
+
+  bossQuantity      Int
+  specialtyQuantity Int
+
+  matQuantity Int
+  matQuality  Int
+}
+
+model TalentRequirement {
+  id          Int @id @default(autoincrement())
+  talentLevel Int @unique
+
+  domainQuantity Int
+  domainQuality  Int
+
+  matQuantity Int
+  matQuality  Int
+
+  weeklyBossQuantity Int
+}
+
+model WeaponLevelRequirement {
+  id             Int @id @default(autoincrement())
+  weaponRarity   Int
+  ascension      Int
+  
+  domainQuantity Int
+  domainQuality  Int
+
+  mat1Quantity Int
+  mat1Quality  Int
+
+  mat2Quantity Int
+  mat2Quality  Int
+
+  @@unique([weaponRarity, ascension])
+}
+
+model MaterialSource {
+  id          Int                @id @default(autoincrement())
+  domainName  String
+  type        MaterialSourceType
+  days        MaterialSourceDays
+  materialKey String
+
+  material MaterialDefinition @relation(fields: [materialKey], references: [key])
+
+  @@unique([domainName, materialKey])
+}
+
+enum MaterialSourceType {
+  TALENT
+  WEAPON
+}
+
+enum MaterialSourceDays {
+  MONDAY_THURSDAY_SUNDAY
+  TUESDAY_FRIDAY_SUNDAY
+  WEDNESDAY_SATURDAY_SUNDAY
+}
+
+enum MaterialType {
+  ASCENSION_GEM
+  BOSS_MATERIAL
+  WEEKLY_BOSS_MATERIAL
+  REGIONAL_SPECIALTY
+  TALENT_MATERIAL
+  COMMON_ENEMY_DROP
+  WEAPON_MATERIAL
+  CURRENCY
+  OTHER
 }

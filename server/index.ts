@@ -1,93 +1,21 @@
 import { createServer } from "node:http";
-
-import {
-  getWeapons,
-  getWeapon,
-  getUserWeapons,
-  getUserWeapon,
-  createWeapon,
-  updateWeapon,
-  deleteWeapon,
-} from "./services/weaponService.ts";
-
-import {
-  getCharacters,
-  getCharacter,
-  createCharacter,
-  getUserCharacters,
-  getUserCharacter,
-  updateCharacter,
-  deleteCharacter,
-} from "./services/characterService.ts";
-
-import {
-  getArtifactSets,
-  getArtifactSet,
-} from "./services/artifactSetService.ts";
-
-import {
-  getUserArtifacts,
-  getUserArtifact,
-  createArtifact,
-  updateArtifact,
-  deleteArtifact,
-} from "./services/artifactService.ts";
-
-import {
-  getUserBuildGuides,
-  getUserBuildGuide,
-  createBuildGuide,
-  updateBuildGuide,
-  deleteBuildGuide,
-} from "./services/buildGuideService.ts";
-
-import {
-  getUserArtifactLoadouts,
-  getUserArtifactLoadout,
-  createArtifactLoadout,
-  updateArtifactLoadout,
-  deleteArtifactLoadout,
-} from "./services/artifactLoadoutService.ts";
-
-import {
-  getUserLoadouts,
-  getUserLoadout,
-  createLoadout,
-  updateLoadout,
-  deleteLoadout,
-} from "./services/loadoutService.ts";
-
-import {
-  validateCharacter,
-  validateCharacterUpdate,
-} from "./validators/characterValidator.ts";
-
-import {
-  validateWeapon,
-  validateWeaponUpdate,
-} from "./validators/weaponValidator.ts";
-
-import {
-  validateArtifact,
-  validateArtifactUpdate,
-} from "./validators/artifactValidator.ts";
-
-import {
-  validateArtifactLoadout,
-  validateArtifactLoadoutUpdate,
-} from "./validators/artifactLoadoutValidator.ts";
-
-import {
-  validateBuildGuide,
-  validateBuildGuideUpdate,
-} from "./validators/buildGuideValidator.ts";
-
-import {
-  validateLoadout,
-  validateLoadoutUpdate,
-} from "./validators/loadoutValidator.ts";
-
+import { getWeapons, getWeapon, getUserWeapons, getUserWeapon, createWeapon, updateWeapon, deleteWeapon } from "./services/weaponService.ts";
+import { getCharacters, getCharacter, createCharacter, getUserCharacters, getUserCharacter, updateCharacter, deleteCharacter } from "./services/characterService.ts";
+import { getArtifactSets, getArtifactSet } from "./services/artifactSetService.ts";
+import { getUserArtifacts, getUserArtifact, createArtifact, updateArtifact, deleteArtifact } from "./services/artifactService.ts";
+import { getUserBuildGuides, getUserBuildGuide, createBuildGuide, updateBuildGuide, deleteBuildGuide } from "./services/buildGuideService.ts";
+import { getUserArtifactLoadouts, getUserArtifactLoadout, createArtifactLoadout, updateArtifactLoadout, deleteArtifactLoadout } from "./services/artifactLoadoutService.ts";
+import { getUserLoadouts, getUserLoadout, createLoadout, updateLoadout, deleteLoadout } from "./services/loadoutService.ts";
+import { validateCharacter, validateCharacterUpdate } from "./validators/characterValidator.ts";
+import { validateWeapon, validateWeaponUpdate } from "./validators/weaponValidator.ts";
+import { validateArtifact, validateArtifactUpdate } from "./validators/artifactValidator.ts";
+import { validateArtifactLoadout, validateArtifactLoadoutUpdate } from "./validators/artifactLoadoutValidator.ts";
+import { validateBuildGuide, validateBuildGuideUpdate } from "./validators/buildGuideValidator.ts";
+import { validateLoadout, validateLoadoutUpdate } from "./validators/loadoutValidator.ts";
 import { ReferenceValidationError } from "./services/serviceError.ts";
+import { calculateCharacterAscensionMaterials } from "./services/calculator/ascencionMaterialCalculationService.ts";
+import { calculateCharacterTalentMaterials } from "./services/calculator/talentMaterialCalculationService.ts";
+import { calculateWeaponAscensionMaterials } from "./services/calculator/materialWeaponCalculationService.ts";
 
 const CURRENT_USER_ID = 1;
 
@@ -237,7 +165,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "GET" &&
       url.pathname ===
-        "/api/user/artifact-loadouts"
+      "/api/user/artifact-loadouts"
     ) {
       const artifactLoadouts =
         await getUserArtifactLoadouts(
@@ -327,7 +255,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "POST" &&
       url.pathname ===
-        "/api/user/artifact-loadouts"
+      "/api/user/artifact-loadouts"
     ) {
       let body = "";
 
@@ -983,7 +911,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "GET" &&
       url.pathname ===
-        "/api/user/build-guides"
+      "/api/user/build-guides"
     ) {
       const buildGuides =
         await getUserBuildGuides(
@@ -1073,7 +1001,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "POST" &&
       url.pathname ===
-        "/api/user/build-guides"
+      "/api/user/build-guides"
     ) {
       let body = "";
 
@@ -1370,7 +1298,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "GET" &&
       url.pathname ===
-        "/api/user/characters"
+      "/api/user/characters"
     ) {
       const characters =
         await getUserCharacters(
@@ -1460,7 +1388,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "POST" &&
       url.pathname ===
-        "/api/user/characters"
+      "/api/user/characters"
     ) {
       let body = "";
 
@@ -1760,7 +1688,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "GET" &&
       url.pathname ===
-        "/api/user/weapons"
+      "/api/user/weapons"
     ) {
       const weapons =
         await getUserWeapons(
@@ -1850,7 +1778,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "POST" &&
       url.pathname ===
-        "/api/user/weapons"
+      "/api/user/weapons"
     ) {
       let body = "";
 
@@ -2139,7 +2067,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "GET" &&
       url.pathname ===
-        "/api/user/artifacts"
+      "/api/user/artifacts"
     ) {
       const artifacts =
         await getUserArtifacts(
@@ -2229,7 +2157,7 @@ const server = createServer(async (req, res) => {
     if (
       req.method === "POST" &&
       url.pathname ===
-        "/api/user/artifacts"
+      "/api/user/artifacts"
     ) {
       let body = "";
 
@@ -2508,6 +2436,191 @@ const server = createServer(async (req, res) => {
       );
       return;
     }
+
+    /* =========================
+   CALCULATOR
+   ========================= */
+
+    /* === POST /api/calculator/character/ascension === */
+
+    if (
+      req.method === "POST" &&
+      url.pathname === "/api/calculator/character/ascension"
+    ) {
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+
+      req.on("end", async () => {
+        try {
+          const data = JSON.parse(body);
+
+          const { characterKey, currentAscension, targetAscension } = data;
+
+          if (typeof characterKey !== "string" || characterKey.trim() === "") {
+            res.statusCode = 400;
+            res.end(
+              JSON.stringify({
+                error: "characterKey es obligatorio",
+              }),
+            );
+            return;
+          }
+
+          const result = await calculateCharacterAscensionMaterials(
+            characterKey,
+            currentAscension,
+            targetAscension,
+          );
+
+          res.statusCode = 200;
+          res.end(JSON.stringify(result, null, 2));
+        } catch (error) {
+          res.statusCode = 400;
+
+          res.end(
+            JSON.stringify({
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "Error al calcular materiales",
+            }),
+          );
+        }
+      });
+
+      return;
+    }
+    /* === POST /api/calculator/character/talents === */
+    if (
+      req.method === "POST" &&
+      url.pathname === "/api/calculator/character/talents"
+    ) {
+      let body = "";
+
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+
+      req.on("end", async () => {
+        try {
+          const data = JSON.parse(body);
+
+          const { characterKey, selections } = data;
+
+          if (
+            typeof characterKey !== "string" ||
+            characterKey.trim() === ""
+          ) {
+            res.statusCode = 400;
+            res.end(
+              JSON.stringify({
+                error: "characterKey es obligatorio",
+              }),
+            );
+            return;
+          }
+
+          if (
+            selections === null ||
+            typeof selections !== "object" ||
+            Array.isArray(selections)
+          ) {
+            res.statusCode = 400;
+            res.end(
+              JSON.stringify({
+                error: "selections debe ser un objeto",
+              }),
+            );
+            return;
+          }
+
+          const result = await calculateCharacterTalentMaterials(
+            characterKey,
+            selections,
+          );
+
+          res.statusCode = 200;
+          res.end(JSON.stringify(result, null, 2));
+        } catch (error) {
+          res.statusCode = 400;
+          res.end(
+            JSON.stringify({
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "Error al calcular materiales de talentos",
+            }),
+          );
+        }
+      });
+
+      return;
+    }
+    /* === POST /api/calculator/weapon/ascension === */
+
+if (
+  req.method === "POST" &&
+  url.pathname === "/api/calculator/weapon/ascension"
+) {
+  let body = "";
+
+  req.on("data", (chunk) => {
+    body += chunk;
+  });
+
+  req.on("end", async () => {
+    try {
+      const data = JSON.parse(body);
+
+      const {
+        weaponKey,
+        currentAscension,
+        targetAscension,
+      } = data;
+
+      if (
+        typeof weaponKey !== "string" ||
+        weaponKey.trim() === ""
+      ) {
+        res.writeHead(400);
+        res.end(
+          JSON.stringify({
+            error: "weaponKey es obligatorio",
+          }),
+        );
+        return;
+      }
+
+      const result =
+        await calculateWeaponAscensionMaterials(
+          weaponKey,
+          currentAscension,
+          targetAscension,
+        );
+
+      res.writeHead(200);
+      res.end(
+        JSON.stringify(result, null, 2),
+      );
+    } catch (error) {
+      res.writeHead(400);
+      res.end(
+        JSON.stringify({
+          error:
+            error instanceof Error
+              ? error.message
+              : "Error al calcular materiales del arma",
+        }),
+      );
+    }
+  });
+
+  return;
+}
+
 
     /* =========================
        GLOBAL CATALOG
