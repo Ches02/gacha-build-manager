@@ -3,10 +3,10 @@ function Sidebar() {
     <aside className="flex w-64 shrink-0 flex-col border-r border-emerald-900/10 bg-emerald-950 px-5 py-6 text-emerald-50">
       <div className="mb-10">
         <h1 className="text-xl font-bold tracking-tight">
-          Gacha Build Manager
+          Benito
         </h1>
         <p className="mt-1 text-sm text-emerald-200">
-          Tu cuaderno de builds
+          El asistente para gatchas
         </p>
       </div>
 

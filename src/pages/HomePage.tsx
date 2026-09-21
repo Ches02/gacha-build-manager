@@ -9,6 +9,96 @@ const characters = [
     build: "Bruja Carmesí",
     imageUrl:
       "https://static.wikia.nocookie.net/gensin-impact/images/0/0d/Diluc_Icon.png",
+
+    materialGroups: [
+  {
+    title: "Ascensión",
+    materials: [
+      {
+        name: "Fragmento de ágata agnidus",
+        icon: "🔴",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Insignia del recluta",
+        icon: "🟡",
+        current: 40,
+        required: 100,
+      },
+      {
+        name: "Semilla de fuego",
+        icon: "🔵",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Luccetta",
+        icon: "🌼",
+        current: 40,
+        required: 100,
+      },
+    ],
+  },
+  {
+    title: "Talentos",
+    materials: [
+      {
+        name: "Enseñanzas de la resistencia",
+        icon: "🔵",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Insignia del recluta",
+        icon: "🟡",
+        current: 40,
+        required: 100,
+      },
+      {
+        name: "Guía de la resistencia",
+        icon: "🔵",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Insignia del sargento",
+        icon: "🟣",
+        current: 40,
+        required: 100,
+      },
+    ],
+  },
+  {
+    title: "Armas",
+    materials: [
+      {
+        name: "Material de mejora de arma",
+        icon: "🔵",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Pergamino",
+        icon: "🟣",
+        current: 40,
+        required: 100,
+      },
+      {
+        name: "Material de mejora",
+        icon: "🔵",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Material de enemigo",
+        icon: "🟣",
+        current: 40,
+        required: 100,
+      },
+    ],
+  },
+],
   },
   {
     name: "Personaje B",
@@ -18,6 +108,66 @@ const characters = [
     build: "Build principal",
     imageUrl:
       "https://static.wikia.nocookie.net/gensin-impact/images/0/0d/Diluc_Icon.png",
+      materialGroups: [
+  {
+    title: "Talentos",
+    materials: [
+      {
+        name: "Enseñanzas de la resistencia",
+        icon: "🔵",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Insignia del recluta",
+        icon: "🟡",
+        current: 40,
+        required: 100,
+      },
+      {
+        name: "Guía de la resistencia",
+        icon: "🔵",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Insignia del sargento",
+        icon: "🟣",
+        current: 40,
+        required: 100,
+      },
+    ],
+  },
+  {
+    title: "Armas",
+    materials: [
+      {
+        name: "Material de mejora de arma",
+        icon: "🔵",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Pergamino",
+        icon: "🟣",
+        current: 40,
+        required: 100,
+      },
+      {
+        name: "Material de mejora",
+        icon: "🔵",
+        current: 6,
+        required: 12,
+      },
+      {
+        name: "Material de enemigo",
+        icon: "🟣",
+        current: 40,
+        required: 100,
+      },
+    ],
+  },
+],
   },
   {
     name: "Personaje C",
@@ -79,6 +229,7 @@ function HomePage() {
               weapon={character.weapon}
               build={character.build}
               imageUrl={character.imageUrl}
+              materialGroups={character.materialGroups || []}
             />
           ))}
         </div>

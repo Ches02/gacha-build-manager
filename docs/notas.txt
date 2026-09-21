@@ -38,12 +38,13 @@ Pendiente
 
     └──Autenticación → dejar de usar CURRENT_USER_ID = 1 y preparar usuarios reales.
     └──FrontEnd
+calculadora del home?
 
 
 a futuro
-    ├── 1 materiales necesarios para subida de lvl y desarrollo
     ├── 2 calculo de stats 
-    └── 3 admin para actualizar BD catalogo
+    ├── 3 admin para actualizar BD catalogo
+    └── calculo de exp/mora/cristales utilizados en subida de lvls
 
 
 ├── └── │ ───
