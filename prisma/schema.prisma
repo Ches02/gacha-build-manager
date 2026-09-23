@@ -232,6 +232,8 @@ model Loadout {
   targetElementalBurstLevel Int?
   targetWeaponLevel         Int?
 
+  showInHome Boolean @default(false)
+
   userId Int
   user   User @relation(fields: [userId], references: [id])
 }
@@ -329,10 +331,10 @@ model TalentRequirement {
 }
 
 model WeaponLevelRequirement {
-  id             Int @id @default(autoincrement())
-  weaponRarity   Int
-  ascension      Int
-  
+  id           Int @id @default(autoincrement())
+  weaponRarity Int
+  ascension    Int
+
   domainQuantity Int
   domainQuality  Int
 
@@ -374,7 +376,8 @@ enum MaterialType {
   WEEKLY_BOSS_MATERIAL
   REGIONAL_SPECIALTY
   TALENT_MATERIAL
-  COMMON_ENEMY_DROP
+  GREEN_COMMON_ENEMY_DROP
+  WHITE_COMMON_ENEMY_DROP
   WEAPON_MATERIAL
   CURRENCY
   OTHER

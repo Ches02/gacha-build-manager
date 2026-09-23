@@ -70,13 +70,6 @@ export async function getUserLoadouts(userId: number) {
         name: loadout.name,
         description: loadout.description,
 
-        targetLevel: loadout.targetLevel,
-        targetAscension: loadout.targetAscension,
-        targetNormalAttackLevel: loadout.targetNormalAttackLevel,
-        targetElementalSkillLevel: loadout.targetElementalSkillLevel,
-        targetElementalBurstLevel: loadout.targetElementalBurstLevel,
-        targetWeaponLevel: loadout.targetWeaponLevel,
-
         character: loadout.character
             ? {
                 id: loadout.character.id,
@@ -202,6 +195,7 @@ export async function getUserLoadouts(userId: number) {
             name: link.buildGuide.name,
             description: link.buildGuide.description,
         })),
+        showInHome: loadout.showInHome,
     }));
 }
 
@@ -278,13 +272,6 @@ export async function getUserLoadout(
         name: loadout.name,
         description: loadout.description,
 
-        targetLevel: loadout.targetLevel,
-        targetAscension: loadout.targetAscension,
-        targetNormalAttackLevel: loadout.targetNormalAttackLevel,
-        targetElementalSkillLevel: loadout.targetElementalSkillLevel,
-        targetElementalBurstLevel: loadout.targetElementalBurstLevel,
-        targetWeaponLevel: loadout.targetWeaponLevel,
-
         character: loadout.character
             ? {
                 id: loadout.character.id,
@@ -410,6 +397,7 @@ export async function getUserLoadout(
             name: link.buildGuide.name,
             description: link.buildGuide.description,
         })),
+        showInHome: loadout.showInHome,
     };
 }
 
@@ -525,11 +513,12 @@ export async function createLoadout(
     userId: number,
     data: {
         name: string;
-        description?: string | null;
+        description?: string;
         characterId: number;
         weaponId?: number | null;
         artifactLoadoutId?: number | null;
         buildGuideIds?: number[];
+        showInHome?: boolean;
 
         targetLevel?: number | null;
         targetAscension?: number | null;
@@ -539,10 +528,7 @@ export async function createLoadout(
         targetWeaponLevel?: number | null;
     },
 ) {
-    await validateLoadoutReferences(
-        userId,
-        data,
-    );
+    await validateLoadoutReferences(userId, data);
 
     const loadout = await prisma.loadout.create({
         data: {
@@ -562,6 +548,8 @@ export async function createLoadout(
             targetElementalBurstLevel:
                 data.targetElementalBurstLevel ?? null,
             targetWeaponLevel: data.targetWeaponLevel ?? null,
+
+            showInHome: data.showInHome ?? false,
 
             ...(data.buildGuideIds !== undefined && {
                 buildGuides: {
@@ -590,6 +578,7 @@ export async function updateLoadout(
         weaponId?: number | null;
         artifactLoadoutId?: number | null;
         buildGuideIds?: number[];
+        showInHome?: boolean;
 
         targetLevel?: number | null;
         targetAscension?: number | null;
@@ -610,16 +599,12 @@ export async function updateLoadout(
         return null;
     }
 
-    await validateLoadoutReferences(
-        userId,
-        data,
-    );
+    await validateLoadoutReferences(userId, data);
 
     const loadout = await prisma.loadout.update({
         where: {
             id,
         },
-
         data: {
             ...(data.name !== undefined && {
                 name: data.name,
@@ -639,6 +624,19 @@ export async function updateLoadout(
 
             ...(data.artifactLoadoutId !== undefined && {
                 artifactLoadoutId: data.artifactLoadoutId,
+            }),
+
+            ...(data.buildGuideIds !== undefined && {
+                buildGuides: {
+                    deleteMany: {},
+                    create: data.buildGuideIds.map((buildGuideId) => ({
+                        buildGuideId,
+                    })),
+                },
+            }),
+
+            ...(data.showInHome !== undefined && {
+                showInHome: data.showInHome,
             }),
 
             ...(data.targetLevel !== undefined && {
@@ -666,15 +664,6 @@ export async function updateLoadout(
 
             ...(data.targetWeaponLevel !== undefined && {
                 targetWeaponLevel: data.targetWeaponLevel,
-            }),
-
-            ...(data.buildGuideIds !== undefined && {
-                buildGuides: {
-                    deleteMany: {},
-                    create: data.buildGuideIds.map((buildGuideId) => ({
-                        buildGuideId,
-                    })),
-                },
             }),
         },
     });

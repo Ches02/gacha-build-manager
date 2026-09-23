@@ -1,186 +1,305 @@
+
+import { useEffect, useState } from "react";
 import CharacterCard from "../components/CharacterCard";
 
-const characters = [
-  {
-    name: "Diluc",
-    level: 90,
-    talents: [9, 9, 10] as [number, number, number],
-    weapon: "Lápida del Lobo",
-    build: "Bruja Carmesí",
-    imageUrl:
-      "https://static.wikia.nocookie.net/gensin-impact/images/0/0d/Diluc_Icon.png",
+interface ApiMaterial {
+  materialKey: string;
+  quantity: number;
+  name: string;
+  type: string;
+}
 
-    materialGroups: [
-  {
-    title: "Ascensión",
-    materials: [
-      {
-        name: "Fragmento de ágata agnidus",
-        icon: "🔴",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Insignia del recluta",
-        icon: "🟡",
-        current: 40,
-        required: 100,
-      },
-      {
-        name: "Semilla de fuego",
-        icon: "🔵",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Luccetta",
-        icon: "🌼",
-        current: 40,
-        required: 100,
-      },
-    ],
-  },
-  {
-    title: "Talentos",
-    materials: [
-      {
-        name: "Enseñanzas de la resistencia",
-        icon: "🔵",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Insignia del recluta",
-        icon: "🟡",
-        current: 40,
-        required: 100,
-      },
-      {
-        name: "Guía de la resistencia",
-        icon: "🔵",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Insignia del sargento",
-        icon: "🟣",
-        current: 40,
-        required: 100,
-      },
-    ],
-  },
-  {
-    title: "Armas",
-    materials: [
-      {
-        name: "Material de mejora de arma",
-        icon: "🔵",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Pergamino",
-        icon: "🟣",
-        current: 40,
-        required: 100,
-      },
-      {
-        name: "Material de mejora",
-        icon: "🔵",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Material de enemigo",
-        icon: "🟣",
-        current: 40,
-        required: 100,
-      },
-    ],
-  },
-],
-  },
-  {
-    name: "Personaje B",
-    level: 80,
-    talents: [8, 8, 8] as [number, number, number],
-    weapon: "Arma equipada",
-    build: "Build principal",
-    imageUrl:
-      "https://static.wikia.nocookie.net/gensin-impact/images/0/0d/Diluc_Icon.png",
-      materialGroups: [
-  {
-    title: "Talentos",
-    materials: [
-      {
-        name: "Enseñanzas de la resistencia",
-        icon: "🔵",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Insignia del recluta",
-        icon: "🟡",
-        current: 40,
-        required: 100,
-      },
-      {
-        name: "Guía de la resistencia",
-        icon: "🔵",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Insignia del sargento",
-        icon: "🟣",
-        current: 40,
-        required: 100,
-      },
-    ],
-  },
-  {
-    title: "Armas",
-    materials: [
-      {
-        name: "Material de mejora de arma",
-        icon: "🔵",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Pergamino",
-        icon: "🟣",
-        current: 40,
-        required: 100,
-      },
-      {
-        name: "Material de mejora",
-        icon: "🔵",
-        current: 6,
-        required: 12,
-      },
-      {
-        name: "Material de enemigo",
-        icon: "🟣",
-        current: 40,
-        required: 100,
-      },
-    ],
-  },
-],
-  },
-  {
-    name: "Personaje C",
-    level: 70,
-    talents: [6, 7, 6] as [number, number, number],
-    weapon: "Arma equipada",
-    build: "Build pendiente",
-    imageUrl:
-      "https://static.wikia.nocookie.net/gensin-impact/images/0/0d/Diluc_Icon.png",
-  },
-];
+interface ApiMaterialCategory {
+  materials: ApiMaterial[];
+}
+
+interface ApiCharacterCard {
+  id: number;
+  name: string;
+  description: string | null;
+
+  character: {
+    id: number;
+    key: string;
+    name: string;
+    element: string;
+    rarity: number;
+    nation: string;
+    weaponType: {
+      key: string;
+      name: string;
+    };
+    level: number;
+    ascension: number;
+    talents: {
+      normalAttack: number;
+      elementalSkill: number;
+      elementalBurst: number;
+    };
+  };
+
+  targets: {
+    level: number | null;
+    ascension: number | null;
+    normalAttackLevel: number | null;
+    elementalSkillLevel: number | null;
+    elementalBurstLevel: number | null;
+    weaponLevel: number | null;
+  };
+
+  weapon: {
+    id: number;
+    key: string;
+    name: string;
+    level: number;
+    refinement: number;
+  } | null;
+
+  artifactLoadout: {
+    id: number;
+    name: string;
+    description: string | null;
+    artifacts: {
+      id: number;
+      set: {
+        key: string;
+        name: string;
+      };
+      slot: {
+        key: string;
+        name: string;
+      };
+      level: number;
+    }[];
+  } | null;
+
+  materials: {
+    ascension: ApiMaterialCategory;
+    talents: ApiMaterialCategory;
+    weapon: ApiMaterialCategory;
+  };
+}
+
+interface ApiResponse {
+  cards: {
+    cards: ApiCharacterCard[];
+  };
+}
+
+interface ApiLoadout {
+  id: number;
+  name: string;
+  description: string | null;
+  showInHome: boolean;
+  character: {
+    name: string;
+  } | null;
+}
 
 function HomePage() {
+  const [characters, setCharacters] = useState<ApiCharacterCard[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showAddPopup, setShowAddPopup] = useState(false);
+  const [loadouts, setLoadouts] = useState<ApiLoadout[]>([]);
+  const [selectedLoadoutId, setSelectedLoadoutId] = useState("");
+  const [loadingLoadouts, setLoadingLoadouts] = useState(false);
+  const [savingLoadout, setSavingLoadout] = useState(false);
+  const [popupError, setPopupError] = useState<string | null>(null);
+  const [loadoutToRemove, setLoadoutToRemove] = useState<number | null>(null);
+  const [removingLoadout, setRemovingLoadout] = useState(false);
+
+  // Cargar las tarjetas de Inicio.
+  async function fetchCharacterCards() {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(
+        "http://localhost:3000/api/home/character-cards",
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Error al cargar las cards: ${response.status}`,
+        );
+      }
+
+      const data: ApiResponse = await response.json();
+      setCharacters(data.cards.cards);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudieron cargar los personajes.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function initialLoad() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(
+          "http://localhost:3000/api/home/character-cards",
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Error al cargar las cards: ${response.status}`,
+          );
+        }
+
+        const data: ApiResponse = await response.json();
+
+        if (!cancelled) {
+          setCharacters(data.cards.cards);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "No se pudieron cargar los personajes.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    initialLoad();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Abrir el popup y cargar los loadouts existentes.
+  async function openAddPopup() {
+    setShowAddPopup(true);
+    setPopupError(null);
+    setSelectedLoadoutId("");
+    setLoadingLoadouts(true);
+
+    try {
+      const response = await fetch(
+        "http://localhost:3000/api/user/loadouts",
+      );
+
+      if (!response.ok) {
+        throw new Error("No se pudieron cargar los loadouts.");
+      }
+
+      const data = await response.json();
+      setLoadouts(data.loadouts);
+    } catch (err) {
+      setPopupError(
+        err instanceof Error
+          ? err.message
+          : "Ocurrió un error al cargar los loadouts.",
+      );
+    } finally {
+      setLoadingLoadouts(false);
+    }
+  }
+
+  // Activar showInHome en el loadout seleccionado.
+  async function handleAddLoadout() {
+    if (!selectedLoadoutId) {
+      setPopupError("Seleccioná un loadout.");
+      return;
+    }
+
+    setSavingLoadout(true);
+    setPopupError(null);
+
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/user/loadouts/${selectedLoadoutId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            showInHome: true,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "No se pudo agregar el personaje a Inicio.",
+        );
+      }
+
+      // Cerramos el popup y actualizamos las tarjetas.
+      setShowAddPopup(false);
+      await fetchCharacterCards();
+    } catch (err) {
+      setPopupError(
+        err instanceof Error
+          ? err.message
+          : "Ocurrió un error al agregar el personaje.",
+      );
+    } finally {
+      setSavingLoadout(false);
+    }
+  }
+
+  async function handleRemoveLoadout() {
+    if (loadoutToRemove === null) return;
+
+    try {
+      setRemovingLoadout(true);
+      setPopupError(null);
+
+      const response = await fetch(
+        `http://localhost:3000/api/user/loadouts/${loadoutToRemove}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            showInHome: false,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("No se pudo quitar el loadout del home.");
+      }
+
+      setLoadoutToRemove(null);
+      await fetchCharacterCards();
+    } catch (err) {
+      setPopupError(
+        err instanceof Error
+          ? err.message
+          : "Ocurrió un error al quitar el loadout.",
+      );
+    } finally {
+      setRemovingLoadout(false);
+    }
+  }
+
+  function openRemovePopup(loadoutId: number) {
+    setLoadoutToRemove(loadoutId);
+    setPopupError(null);
+  }
+
+
+
   return (
     <div className="min-h-screen px-8 py-8">
       <header>
@@ -213,27 +332,243 @@ function HomePage() {
 
           <button
             type="button"
+            onClick={openAddPopup}
             className="rounded-lg bg-emerald-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
           >
             + Agregar PJ
           </button>
         </div>
 
-        <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {characters.map((character) => (
-            <CharacterCard
-              key={character.name}
-              name={character.name}
-              level={character.level}
-              talents={character.talents}
-              weapon={character.weapon}
-              build={character.build}
-              imageUrl={character.imageUrl}
-              materialGroups={character.materialGroups || []}
-            />
-          ))}
-        </div>
+        {loading && (
+          <p className="mt-5 text-sm text-emerald-800/70">
+            Cargando personajes...
+          </p>
+        )}
+
+        {error && (
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <p className="font-semibold">
+              No se pudieron cargar los personajes.
+            </p>
+            <p className="mt-1">{error}</p>
+          </div>
+        )}
+
+        {!loading && !error && characters.length === 0 && (
+          <p className="mt-5 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800/70">
+            Todavía no hay personajes para mostrar en Inicio.
+          </p>
+        )}
+
+        {!loading && !error && characters.length > 0 && (
+          <div className="mt-5 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {characters.map((card) => {
+              const materialGroups = [
+                {
+                  title: "Ascensión",
+                  materials: card.materials.ascension.materials.map(
+                    (material) => ({
+                      name: material.name,
+                      icon: `/images/materials/${material.type}/${material.materialKey}.webp`,
+                      required: material.quantity,
+                    }),
+                  ),
+                },
+                {
+                  title: "Talentos",
+                  materials: card.materials.talents.materials.map(
+                    (material) => ({
+                      name: material.name,
+                      icon: `/images/materials/${material.type}/${material.materialKey}.webp`,
+                      required: material.quantity,
+                    }),
+                  ),
+                },
+                {
+                  title: "Armas",
+                  materials: card.materials.weapon.materials.map(
+                    (material) => ({
+                      name: material.name,
+                      icon: `/images/materials/${material.type}/${material.materialKey}.webp`,
+                      required: material.quantity,
+                    }),
+                  ),
+                },
+              ];
+
+              return (
+                <CharacterCard
+                  key={card.id}
+                  name={card.character.name}
+                  level={card.character.level}
+                  talents={[
+                    card.character.talents.normalAttack,
+                    card.character.talents.elementalSkill,
+                    card.character.talents.elementalBurst,
+                  ]}
+                  weapon={card.weapon?.name ?? "Sin arma"}
+                  build={
+                    card.artifactLoadout?.name ??
+                    card.name ??
+                    "Sin build"
+                  }
+                  imageUrl= {`/images/characters/${card.character.key}.webp`}
+                  
+                  materialGroups={materialGroups}
+                  onRemove={() => openRemovePopup(card.id)}
+                />
+              );
+            })}
+          </div>
+        )}
       </section>
+
+      {/* Popup para agregar un loadout existente */}
+      {showAddPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-[#fffdf5] p-6 shadow-xl">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-emerald-950">
+                  Agregar personaje
+                </h3>
+
+                <p className="mt-1 text-sm text-emerald-800/70">
+                  Seleccioná un loadout existente para mostrarlo en Inicio.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowAddPopup(false)}
+                className="rounded-lg px-2 py-1 text-lg text-emerald-900 hover:bg-emerald-100"
+                aria-label="Cerrar"
+              >
+                ×
+              </button>
+            </div>
+
+            {loadingLoadouts ? (
+              <p className="mt-5 text-sm text-emerald-800/70">
+                Cargando loadouts...
+              </p>
+            ) : (
+              <>
+                <label
+                  htmlFor="loadout-select"
+                  className="mt-5 block text-sm font-semibold text-emerald-950"
+                >
+                  Loadout
+                </label>
+
+                <select
+                  id="loadout-select"
+                  value={selectedLoadoutId}
+                  onChange={(event) =>
+                    setSelectedLoadoutId(event.target.value)
+                  }
+                  className="mt-2 w-full rounded-lg border border-emerald-900/20 bg-white px-3 py-2 text-sm text-emerald-950 outline-none focus:border-emerald-700"
+                >
+                  <option value="">Elegí un loadout...</option>
+
+                  {loadouts.map((loadout) => (
+                    <option
+                      key={loadout.id}
+                      value={loadout.id}
+                      disabled={loadout.showInHome}
+                    >
+                      {loadout.character?.name ?? "Personaje"} —{" "}
+                      {loadout.name}
+                      {loadout.showInHome
+                        ? " (ya está en Inicio)"
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+
+                {loadouts.length === 0 && (
+                  <p className="mt-3 text-sm text-emerald-800/70">
+                    No tenés loadouts creados todavía.
+                  </p>
+                )}
+              </>
+            )}
+
+            {popupError && (
+              <p className="mt-3 text-sm text-red-700">
+                {popupError}
+              </p>
+            )}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowAddPopup(false)}
+                className="rounded-lg border border-emerald-900/20 px-4 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-50"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAddLoadout}
+                disabled={
+                  loadingLoadouts ||
+                  savingLoadout ||
+                  !selectedLoadoutId
+                }
+                className="rounded-lg bg-emerald-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {savingLoadout ? "Agregando..." : "Agregar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Popup para quitar un loadout de Inicio */}
+      {loadoutToRemove !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-[#fffdf5] p-6 shadow-xl">
+            <h3 className="text-xl font-bold text-emerald-950">
+              Quitar del home
+            </h3>
+
+            <p className="mt-3 text-sm leading-relaxed text-emerald-800/80">
+              ¿Seguro que querés quitar este loadout del home?
+            </p>
+
+            {popupError && (
+              <p className="mt-3 text-sm text-red-700">
+                {popupError}
+              </p>
+            )}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setLoadoutToRemove(null);
+                  setPopupError(null);
+                }}
+                disabled={removingLoadout}
+                className="rounded-lg border border-emerald-900/20 px-4 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-50 disabled:opacity-50"
+              >
+                No
+              </button>
+
+              <button
+                type="button"
+                onClick={handleRemoveLoadout}
+                disabled={removingLoadout}
+                className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {removingLoadout ? "Quitando..." : "Sí, quitar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="mt-8 rounded-2xl border border-emerald-900/10 bg-[#fffdf5] p-6 shadow-sm">
         <h3 className="text-lg font-bold text-emerald-950">
@@ -250,21 +585,27 @@ function HomePage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
               Materiales
             </p>
-            <p className="mt-2 text-2xl font-bold text-emerald-950">—</p>
+            <p className="mt-2 text-2xl font-bold text-emerald-950">
+              —
+            </p>
           </div>
 
           <div className="rounded-xl bg-emerald-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
               Talentos
             </p>
-            <p className="mt-2 text-2xl font-bold text-emerald-950">—</p>
+            <p className="mt-2 text-2xl font-bold text-emerald-950">
+              —
+            </p>
           </div>
 
           <div className="rounded-xl bg-emerald-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
               Armas
             </p>
-            <p className="mt-2 text-2xl font-bold text-emerald-950">—</p>
+            <p className="mt-2 text-2xl font-bold text-emerald-950">
+              —
+            </p>
           </div>
         </div>
       </section>

@@ -169,12 +169,19 @@ export function validateLoadout(
         if (
             Array.isArray(data.buildGuideIds) &&
             new Set(data.buildGuideIds).size !==
-                data.buildGuideIds.length
+            data.buildGuideIds.length
         ) {
             errors.push(
                 "buildGuideIds no puede contener IDs repetidos",
             );
         }
+    }
+
+    if (
+        data.showInHome !== undefined &&
+        typeof data.showInHome !== "boolean"
+    ) {
+        errors.push("showInHome debe ser un booleano");
     }
 
     validateTargetFields(data, errors);
@@ -258,12 +265,19 @@ export function validateLoadoutUpdate(
         if (
             Array.isArray(data.buildGuideIds) &&
             new Set(data.buildGuideIds).size !==
-                data.buildGuideIds.length
+            data.buildGuideIds.length
         ) {
             errors.push(
                 "buildGuideIds no puede contener IDs repetidos",
             );
         }
+    }
+
+    if (
+        data.showInHome !== undefined &&
+        typeof data.showInHome !== "boolean"
+    ) {
+        errors.push("showInHome debe ser un booleano");
     }
 
     validateTargetFields(data, errors);

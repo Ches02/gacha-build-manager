@@ -15,11 +15,21 @@ import { validateLoadout, validateLoadoutUpdate } from "./validators/loadoutVali
 import { ReferenceValidationError } from "./services/serviceError.ts";
 import { calculateCharacterAscensionMaterials } from "./services/calculator/ascencionMaterialCalculationService.ts";
 import { calculateCharacterTalentMaterials } from "./services/calculator/talentMaterialCalculationService.ts";
-import { calculateWeaponAscensionMaterials } from "./services/calculator/materialWeaponCalculationService.ts";
+import { calculateWeaponAscensionMaterials } from "./services/calculator/weaponMaterialCalculationService.ts";
+import { getCharacterCards } from "./services/home/characterCardsService.ts";
 
 const CURRENT_USER_ID = 1;
 
 const server = createServer(async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+if (req.method === "OPTIONS") {
+  res.writeHead(204);
+  res.end();
+  return;
+}
   try {
     const url = new URL(
       req.url ?? "/",
@@ -2621,6 +2631,31 @@ if (
   return;
 }
 
+    /* =========================
+       HOME
+       ========================= */
+
+    /* === GET /api/home/character-cards === */
+
+    if (
+      req.method === "GET" &&
+      url.pathname === "/api/home/character-cards"
+    ) {
+      const cards = await getCharacterCards(
+        CURRENT_USER_ID,
+        "es",
+      );
+
+      res.writeHead(200);
+      res.end(
+        JSON.stringify(
+          { cards },
+          null,
+          2,
+        ),
+      );
+      return;
+    }
 
     /* =========================
        GLOBAL CATALOG
@@ -2784,6 +2819,27 @@ if (
       JSON.stringify(
         {
           error: "JSON inválido",
+        },
+        null,
+        2,
+      ),
+    );
+
+        /* =========================
+       GENERIC ERROR
+       ========================= */
+
+    console.error("Error en la API:", error);
+
+    res.writeHead(500);
+    res.end(
+      JSON.stringify(
+        {
+          error: "Error interno del servidor",
+          details:
+            error instanceof Error
+              ? error.message
+              : String(error),
         },
         null,
         2,

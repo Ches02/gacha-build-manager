@@ -8,6 +8,7 @@ type TalentLevels = {
 type TalentMaterialAmount = {
   materialKey: string;
   quantity: number;
+  type: string;
 };
 
 type TalentCalculation = {
@@ -198,14 +199,60 @@ export async function calculateCharacterTalentMaterials(
     }
   }
 
+  async function addMaterialTypes(
+    materials: {
+      materialKey: string;
+      quantity: number;
+    }[],
+  ) {
+    const materialDefinitions =
+      await prisma.materialDefinition.findMany({
+        where: {
+          key: {
+            in: materials.map(
+              (material) => material.materialKey,
+            ),
+          },
+        },
+        select: {
+          key: true,
+          type: true,
+        },
+      });
+
+    const typesByKey = new Map(
+      materialDefinitions.map((material) => [
+        material.key,
+        material.type,
+      ]),
+    );
+
+    return materials.map((material) => {
+      const type = typesByKey.get(material.materialKey);
+
+      if (!type) {
+        throw new Error(
+          `No se encontró el tipo del material: ${material.materialKey}`,
+        );
+      }
+
+      return {
+        ...material,
+        type,
+      };
+    });
+  }
+
   return {
     characterKey,
     talents: talentResults,
-    materials: Array.from(materialTotals.entries()).map(
-      ([materialKey, quantity]) => ({
-        materialKey,
-        quantity,
-      }),
+    materials: await addMaterialTypes(
+      Array.from(materialTotals.entries()).map(
+        ([materialKey, quantity]) => ({
+          materialKey,
+          quantity,
+        }),
+      ),
     ),
   };
 }
