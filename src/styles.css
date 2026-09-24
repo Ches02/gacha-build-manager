@@ -1,1 +1,239 @@
 @import "tailwindcss";
+
+/* =========================
+   Modal de crear loadout
+   ========================= */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(8, 20, 15, 0.58);
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  width: 100%;
+  max-width: 850px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  border: 1px solid rgba(6, 78, 59, 0.15);
+  border-radius: 20px;
+  background: #fffdf5;
+  color: #064e3b;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+/* Título */
+
+.modal h2 {
+  margin: 0 0 24px;
+  color: #064e3b;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+/* Formulario en dos columnas */
+
+.modal form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 22px;
+  align-items: start;
+}
+
+/* Etiquetas y campos */
+
+.modal form > label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  color: #064e3b;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+/* Inputs, selects y textarea */
+
+.modal input:not([type="checkbox"]),
+.modal select,
+.modal textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid rgba(6, 78, 59, 0.22);
+  border-radius: 10px;
+  background: #ffffff;
+  color: #12372c;
+  font: inherit;
+  font-weight: 400;
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.modal textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.modal input:not([type="checkbox"]):focus,
+.modal select:focus,
+.modal textarea:focus {
+  border-color: #047857;
+  box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.13);
+}
+
+/* Guías de build */
+
+.modal fieldset {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid rgba(6, 78, 59, 0.18);
+  border-radius: 12px;
+  background: rgba(236, 253, 245, 0.55);
+}
+
+.modal fieldset legend {
+  padding: 0 8px;
+  color: #064e3b;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.modal fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.modal input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #047857;
+}
+
+/* El checkbox de mostrar en Home */
+
+.modal form > label:has(input[type="checkbox"]) {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Mensaje de error */
+
+.modal .error-message {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  white-space: pre-line;
+}
+
+/* Botones */
+
+.modal .modal-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(6, 78, 59, 0.12);
+}
+
+.modal .modal-actions button {
+  padding: 11px 18px;
+  border: 1px solid rgba(6, 78, 59, 0.22);
+  border-radius: 10px;
+  background: white;
+  color: #064e3b;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.modal .modal-actions button:hover:not(:disabled) {
+  background: #ecfdf5;
+  transform: translateY(-1px);
+}
+
+.modal .modal-actions button[type="submit"] {
+  border-color: #047857;
+  background: #047857;
+  color: white;
+}
+
+.modal .modal-actions button[type="submit"]:hover:not(:disabled) {
+  background: #065f46;
+}
+
+.modal .modal-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* Texto de carga y mensajes */
+
+.modal > p {
+  margin: 0 0 18px;
+  color: #065f46;
+}
+
+/* Pantallas chicas */
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 12px;
+  }
+
+  .modal {
+    max-height: calc(100vh - 24px);
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .modal form {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .modal fieldset,
+  .modal form > label:has(input[type="checkbox"]),
+  .modal .modal-actions {
+    grid-column: 1;
+  }
+
+  .modal .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal .modal-actions button {
+    width: 100%;
+  }
+}

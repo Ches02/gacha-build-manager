@@ -360,8 +360,8 @@ model MaterialSource {
 }
 
 enum MaterialSourceType {
-  TALENT
-  WEAPON
+  TALENT_MATERIAL
+  WEAPON_MATERIAL
 }
 
 enum MaterialSourceDays {

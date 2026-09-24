@@ -17,6 +17,7 @@ import { calculateCharacterAscensionMaterials } from "./services/calculator/asce
 import { calculateCharacterTalentMaterials } from "./services/calculator/talentMaterialCalculationService.ts";
 import { calculateWeaponAscensionMaterials } from "./services/calculator/weaponMaterialCalculationService.ts";
 import { getCharacterCards } from "./services/home/characterCardsService.ts";
+import { getHomeCalendar } from "./services/home/calendarService.ts";
 
 const CURRENT_USER_ID = 1;
 
@@ -2656,6 +2657,24 @@ if (
       );
       return;
     }
+
+    /* === GET /api/home/calendar === */
+    if (req.method === "GET" && url.pathname === "/api/home/calendar") {
+    const calendar = await getHomeCalendar(
+        CURRENT_USER_ID,
+        "es",
+    );
+
+    res.writeHead(200);
+    res.end(
+        JSON.stringify(
+            calendar,
+            null,
+            2,
+        ),
+    );
+    return;
+}
 
     /* =========================
        GLOBAL CATALOG

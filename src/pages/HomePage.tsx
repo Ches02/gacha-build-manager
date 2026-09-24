@@ -1,7 +1,10 @@
 
 import { useEffect, useState } from "react";
 import CharacterCard from "../components/CharacterCard";
+import CreateLoadoutModal from "../components/CreateLoadoutModal";
 
+
+/*--- CHARACTER CARD ---*/
 interface ApiMaterial {
   materialKey: string;
   quantity: number;
@@ -96,6 +99,27 @@ interface ApiLoadout {
   } | null;
 }
 
+/*--- CALENDAR ---*/
+interface ApiCalendarMaterial {
+  materialKey: string;
+  name: string;
+  type: string;
+  rarity: number;
+  quantity?: number;
+}
+
+interface ApiCalendarCategory {
+  required: ApiCalendarMaterial[];
+  availableRare3?: ApiCalendarMaterial[];
+  availableRare4?: ApiCalendarMaterial[];
+}
+
+interface ApiCalendarResponse {
+  day: string;
+  talents: ApiCalendarCategory;
+  weapons: ApiCalendarCategory;
+}
+
 function HomePage() {
   const [characters, setCharacters] = useState<ApiCharacterCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -108,6 +132,10 @@ function HomePage() {
   const [popupError, setPopupError] = useState<string | null>(null);
   const [loadoutToRemove, setLoadoutToRemove] = useState<number | null>(null);
   const [removingLoadout, setRemovingLoadout] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [calendar, setCalendar] = useState<ApiCalendarResponse | null>(null);
+  const [loadingCalendar, setLoadingCalendar] = useState(true);
+  const [calendarError, setCalendarError] = useState<string | null>(null);
 
   // Cargar las tarjetas de Inicio.
   async function fetchCharacterCards() {
@@ -177,6 +205,7 @@ function HomePage() {
     }
 
     initialLoad();
+    fetchCalendar();
 
     return () => {
       cancelled = true;
@@ -256,6 +285,7 @@ function HomePage() {
     }
   }
 
+  // Quitamos un Loadout de Inicio
   async function handleRemoveLoadout() {
     if (loadoutToRemove === null) return;
 
@@ -293,12 +323,49 @@ function HomePage() {
     }
   }
 
+  // Popup de confirmación para quitar un loadout de Inicio
   function openRemovePopup(loadoutId: number) {
     setLoadoutToRemove(loadoutId);
     setPopupError(null);
   }
 
+  // Abrir el modal para crear un nuevo loadout
+  function openCreateLoadout() {
+    setShowAddPopup(false);
+    setPopupError(null);
+    setShowCreateModal(true);
+  }
 
+  // Cargar el calendario de materiales
+  async function fetchCalendar() {
+    try {
+      setLoadingCalendar(true);
+      setCalendarError(null);
+
+      const response = await fetch(
+        "http://localhost:3000/api/home/calendar",
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Error al cargar el calendario: ${response.status}`,
+        );
+      }
+
+      const data: ApiCalendarResponse =
+        await response.json();
+
+      setCalendar(data);
+    } catch (err) {
+      setCalendarError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo cargar el calendario.",
+      );
+    } finally {
+      setLoadingCalendar(false);
+    }
+  }
 
   return (
     <div className="min-h-screen px-8 py-8">
@@ -412,8 +479,8 @@ function HomePage() {
                     card.name ??
                     "Sin build"
                   }
-                  imageUrl= {`/images/characters/${card.character.key}.webp`}
-                  
+                  imageUrl={`/images/characters/${card.character.key}.webp`}
+
                   materialGroups={materialGroups}
                   onRemove={() => openRemovePopup(card.id)}
                 />
@@ -500,27 +567,38 @@ function HomePage() {
               </p>
             )}
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={() => setShowAddPopup(false)}
-                className="rounded-lg border border-emerald-900/20 px-4 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-50"
+                onClick={openCreateLoadout}
+                disabled={loadingLoadouts || savingLoadout}
+                className="rounded-lg border border-emerald-800 px-4 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Cancelar
+                + Crear loadout
               </button>
 
-              <button
-                type="button"
-                onClick={handleAddLoadout}
-                disabled={
-                  loadingLoadouts ||
-                  savingLoadout ||
-                  !selectedLoadoutId
-                }
-                className="rounded-lg bg-emerald-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {savingLoadout ? "Agregando..." : "Agregar"}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAddPopup(false)}
+                  className="rounded-lg border border-emerald-900/20 px-4 py-2 text-sm font-semibold text-emerald-900 hover:bg-emerald-50"
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleAddLoadout}
+                  disabled={
+                    loadingLoadouts ||
+                    savingLoadout ||
+                    !selectedLoadoutId
+                  }
+                  className="rounded-lg bg-emerald-800 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {savingLoadout ? "Agregando..." : "Agregar"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -570,44 +648,160 @@ function HomePage() {
         </div>
       )}
 
+      {showCreateModal && (
+        <CreateLoadoutModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={async () => {
+            setShowCreateModal(false);
+            await fetchCharacterCards();
+          }}
+        />
+      )}
+
       <section className="mt-8 rounded-2xl border border-emerald-900/10 bg-[#fffdf5] p-6 shadow-sm">
-        <h3 className="text-lg font-bold text-emerald-950">
-          Mis recursos
-        </h3>
+        <div>
+          <h3 className="text-lg font-bold text-emerald-950">
+            Materiales disponibles hoy
+          </h3>
 
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-emerald-800/70">
-          Acá podremos mostrar materiales pendientes, días de dominio,
-          recursos necesarios para talentos, armas y otros objetivos.
-        </p>
-
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-xl bg-emerald-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
-              Materiales
+          {calendar && (
+            <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-emerald-600">
+              {calendar.day}
             </p>
-            <p className="mt-2 text-2xl font-bold text-emerald-950">
-              —
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-emerald-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
-              Talentos
-            </p>
-            <p className="mt-2 text-2xl font-bold text-emerald-950">
-              —
-            </p>
-          </div>
-
-          <div className="rounded-xl bg-emerald-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
-              Armas
-            </p>
-            <p className="mt-2 text-2xl font-bold text-emerald-950">
-              —
-            </p>
-          </div>
+          )}
         </div>
+
+        {loadingCalendar && (
+          <p className="mt-5 text-sm text-emerald-800/70">
+            Cargando calendario...
+          </p>
+        )}
+
+        {calendarError && (
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <p className="font-semibold">
+              No se pudo cargar el calendario.
+            </p>
+
+            <p className="mt-1">
+              {calendarError}
+            </p>
+          </div>
+        )}
+
+        {!loadingCalendar &&
+          !calendarError &&
+          calendar && (
+            <div className="mt-6 space-y-8">
+
+              {/* TALENTOS */}
+              <div>
+                <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-950">
+                  Talentos
+                </h4>
+
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {calendar.talents.required.length === 0 ? (
+                    <p className="text-sm text-emerald-800/60">
+                      No necesitás materiales de talentos disponibles hoy.
+                    </p>
+                  ) : (
+                    calendar.talents.required.map((material) => (
+                      <div
+                      key={material.name}
+                      title={`${material.name}: necesitás ${material.quantity}`}
+                      className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
+                    >
+                      <img
+                        src={`/images/materials/${material.type}/${material.materialKey}.webp`}
+                        alt={material.name}
+                        title={material.name}
+                        className="h-full w-full object-contain p-0.5"
+                      />
+
+                      <span className="absolute inset-x-0 bottom-0 bg-black/60 px-0.5 text-center text-[9px] font-semibold leading-3 text-white">
+                        {material.quantity}
+                      </span>
+                    </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {calendar.talents.availableRare3?.map(
+                    (material) => (
+                      <div
+                      key={material.name}
+                      title={`${material.name}`}
+                      className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
+                    >
+                      <img
+                        src={`/images/materials/${material.type}/${material.materialKey}.webp`}
+                        alt={material.name}
+                        title={material.name}
+                        className="h-full w-full object-contain p-0.5"
+                      />
+                    </div>
+                    ),
+                  )}
+                </div>
+              </div>
+
+              {/* ARMAS */}
+              <div>
+                <h4 className="text-sm font-bold uppercase tracking-widest text-emerald-950">
+                  Armas
+                </h4>
+
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {calendar.weapons.required.length === 0 ? (
+                    <p className="text-sm text-emerald-800/60">
+                      No necesitás materiales de armas disponibles hoy.
+                    </p>
+                  ) : (
+                    calendar.weapons.required.map((material) => (
+                    <div
+                      key={material.name}
+                      title={`${material.name}: necesitás ${material.quantity}`}
+                      className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
+                    >
+                      <img
+                        src={`/images/materials/${material.type}/${material.materialKey}.webp`}
+                        alt={material.name}
+                        title={material.name}
+                        className="h-full w-full object-contain p-0.5"
+                      />
+
+                      <span className="absolute inset-x-0 bottom-0 bg-black/60 px-0.5 text-center text-[9px] font-semibold leading-3 text-white">
+                        {material.quantity}
+                      </span>
+                    </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {calendar.weapons.availableRare4?.map(
+                    (material) => (
+                      <div
+                      key={material.name}
+                      title={`${material.name}`}
+                      className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
+                    >
+                      <img
+                        src={`/images/materials/${material.type}/${material.materialKey}.webp`}
+                        alt={material.name}
+                        title={material.name}
+                        className="h-full w-full object-contain p-0.5"
+                      />
+                    </div>
+                    ),
+                  )}
+                </div>
+              </div>
+
+            </div>
+          )}
       </section>
     </div>
   );
