@@ -700,6 +700,123 @@ function MisPJsPage() {
     }
   }
 
+    async function handleUpdateCharacter(
+    characterId: number,
+    data: {
+      level: number;
+      constellation: number;
+      friendship: number;
+      ascension: number;
+      normalAttackLevel: number;
+      elementalSkillLevel: number;
+      elementalBurstLevel: number;
+    },
+  ) {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/user/characters/${characterId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ??
+          "No se pudo actualizar el personaje.",
+        );
+      }
+
+      const userCharactersResponse = await fetch(
+        "http://localhost:3000/api/user/characters",
+      );
+
+      if (!userCharactersResponse.ok) {
+        throw new Error(
+          "El personaje se actualizó, pero no se pudieron refrescar los datos.",
+        );
+      }
+
+      const userCharactersData =
+        await userCharactersResponse.json();
+
+      const updatedCharacters =
+        userCharactersData.characters ??
+        userCharactersData;
+
+      setUserCharacters(updatedCharacters);
+    } catch (error) {
+      console.error(
+        "Error al actualizar personaje:",
+        error,
+      );
+
+      throw error;
+    }
+  }
+
+  async function handleUpdateLoadout(
+    loadoutId: number,
+    data: {
+      name: string;
+      description: string | null;
+    },
+  ) {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/user/loadouts/${loadoutId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        },
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error ??
+          "No se pudo actualizar el loadout.",
+        );
+      }
+
+      const loadoutsResponse = await fetch(
+        "http://localhost:3000/api/user/loadouts",
+      );
+
+      if (!loadoutsResponse.ok) {
+        throw new Error(
+          "El loadout se actualizó, pero no se pudieron refrescar los datos.",
+        );
+      }
+
+      const loadoutsData =
+        await loadoutsResponse.json();
+
+      const updatedLoadouts =
+        loadoutsData.loadouts ??
+        loadoutsData;
+
+      setLoadouts(updatedLoadouts);
+    } catch (error) {
+      console.error(
+        "Error al actualizar loadout:",
+        error,
+      );
+
+      throw error;
+    }
+  }
+
   return (
     <div className="min-h-screen px-8 py-8">
       <header>
@@ -984,7 +1101,8 @@ function MisPJsPage() {
 
               onSetPreferredCharacter={handleSetPreferredCharacter}
               onSetPreferredLoadout={handleSetPreferredLoadout}
-
+              onUpdateCharacter={handleUpdateCharacter}
+              onUpdateLoadout={handleUpdateLoadout}
               onCreateCharacter={() => {
                 setCharacterToCreate(selectedCharacter);
                 setShowCreateCharacterModal(true);
