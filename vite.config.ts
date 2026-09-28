@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  base: '/gacha-build-manager/',
+  base: '/gatcha/',
   plugins: [
     react(),
     tailwindcss(),
