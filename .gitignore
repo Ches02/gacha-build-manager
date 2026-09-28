@@ -31,4 +31,6 @@ dist-ssr
 
 gacha.db
 
-src/test-db.ts
+/src/test-db.ts
+
+/docs/logins y cosas.txt
