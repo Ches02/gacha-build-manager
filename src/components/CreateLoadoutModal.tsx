@@ -39,11 +39,13 @@ type BuildGuide = {
 };
 
 type Props = {
+  characterId?: number;
   onClose: () => void;
-  onCreated: () => void;
+  onCreated: (loadoutId: number) => void | Promise<void>;
 };
 
 export default function CreateLoadoutModal({
+  characterId: initialCharacterId,
   onClose,
   onCreated,
 }: Props) {
@@ -57,7 +59,7 @@ export default function CreateLoadoutModal({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  const [characterId, setCharacterId] = useState("");
+  const [characterId, setCharacterId] = useState(initialCharacterId !== undefined ? String(initialCharacterId) : "");
   const [weaponId, setWeaponId] = useState("");
   const [artifactLoadoutId, setArtifactLoadoutId] = useState("");
   const [buildGuideIds, setBuildGuideIds] = useState<number[]>([]);
@@ -148,47 +150,47 @@ export default function CreateLoadoutModal({
   );
 
   function getAscensionFromLevel(level: number): number {
-  if (level <= 20) return 0;
-  if (level <= 40) return 1;
-  if (level <= 50) return 2;
-  if (level <= 60) return 3;
-  if (level <= 70) return 4;
-  if (level <= 80) return 5;
-  return 6;
-}
-
-function getLevelFromAscension(ascension: number): number {
-  const levels = [20, 40, 50, 60, 70, 80, 90];
-  return levels[ascension] ?? 20;
-}
-
-function handleTargetLevelChange(value: string) {
-  setTargetLevel(value);
-
-  if (value === "") {
-    setTargetAscension("");
-    return;
+    if (level <= 20) return 0;
+    if (level <= 40) return 1;
+    if (level <= 50) return 2;
+    if (level <= 60) return 3;
+    if (level <= 70) return 4;
+    if (level <= 80) return 5;
+    return 6;
   }
 
-  const level = Number(value);
-  const ascension = getAscensionFromLevel(level);
-
-  setTargetAscension(String(ascension));
-}
-
-function handleTargetAscensionChange(value: string) {
-  setTargetAscension(value);
-
-  if (value === "") {
-    setTargetLevel("");
-    return;
+  function getLevelFromAscension(ascension: number): number {
+    const levels = [20, 40, 50, 60, 70, 80, 90];
+    return levels[ascension] ?? 20;
   }
 
-  const ascension = Number(value);
-  const level = getLevelFromAscension(ascension);
+  function handleTargetLevelChange(value: string) {
+    setTargetLevel(value);
 
-  setTargetLevel(String(level));
-}
+    if (value === "") {
+      setTargetAscension("");
+      return;
+    }
+
+    const level = Number(value);
+    const ascension = getAscensionFromLevel(level);
+
+    setTargetAscension(String(ascension));
+  }
+
+  function handleTargetAscensionChange(value: string) {
+    setTargetAscension(value);
+
+    if (value === "") {
+      setTargetLevel("");
+      return;
+    }
+
+    const ascension = Number(value);
+    const level = getLevelFromAscension(ascension);
+
+    setTargetLevel(String(level));
+  }
 
   function handleCharacterChange(value: string) {
     setCharacterId(value);
@@ -216,100 +218,103 @@ function handleTargetAscensionChange(value: string) {
     );
   }
 
-  async function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>,
-  ) {
-    event.preventDefault();
+async function handleSubmit(
+  event: React.SubmitEvent<HTMLFormElement>,
+) {
+  event.preventDefault();
 
-    if (!characterId) {
-      setError("Tenés que seleccionar un personaje.");
-      return;
-    }
+  if (!characterId) {
+    setError("Tenés que seleccionar un personaje.");
+    return;
+  }
 
-    setSaving(true);
-    setError("");
+  setSaving(true);
+  setError("");
 
-    const data = {
-      name: name.trim(),
-      description: description.trim() || undefined,
+  const data = {
+    name: name.trim(),
+    description: description.trim() || undefined,
 
-      characterId: Number(characterId),
+    characterId: Number(characterId),
 
-      weaponId: weaponId ? Number(weaponId) : null,
+    weaponId: weaponId ? Number(weaponId) : null,
 
-      artifactLoadoutId: artifactLoadoutId
-        ? Number(artifactLoadoutId)
+    artifactLoadoutId: artifactLoadoutId
+      ? Number(artifactLoadoutId)
+      : null,
+
+    buildGuideIds,
+
+    showInHome,
+
+    targetLevel:
+      targetLevel !== "" ? Number(targetLevel) : null,
+
+    targetAscension:
+      targetAscension !== ""
+        ? Number(targetAscension)
         : null,
 
-      buildGuideIds,
+    targetNormalAttackLevel:
+      targetNormalAttackLevel !== ""
+        ? Number(targetNormalAttackLevel)
+        : null,
 
-      showInHome,
+    targetElementalSkillLevel:
+      targetElementalSkillLevel !== ""
+        ? Number(targetElementalSkillLevel)
+        : null,
 
-      targetLevel:
-        targetLevel !== "" ? Number(targetLevel) : null,
+    targetElementalBurstLevel:
+      targetElementalBurstLevel !== ""
+        ? Number(targetElementalBurstLevel)
+        : null,
 
-      targetAscension:
-        targetAscension !== ""
-          ? Number(targetAscension)
-          : null,
+    targetWeaponLevel:
+      targetWeaponLevel !== ""
+        ? Number(targetWeaponLevel)
+        : null,
+  };
 
-      targetNormalAttackLevel:
-        targetNormalAttackLevel !== ""
-          ? Number(targetNormalAttackLevel)
-          : null,
-
-      targetElementalSkillLevel:
-        targetElementalSkillLevel !== ""
-          ? Number(targetElementalSkillLevel)
-          : null,
-
-      targetElementalBurstLevel:
-        targetElementalBurstLevel !== ""
-          ? Number(targetElementalBurstLevel)
-          : null,
-
-      targetWeaponLevel:
-        targetWeaponLevel !== ""
-          ? Number(targetWeaponLevel)
-          : null,
-    };
-
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/user/loadouts",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
+  try {
+    const response = await fetch(
+      "http://localhost:3000/api/user/loadouts",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify(data),
+      },
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      const details = Array.isArray(result.details)
+        ? result.details.join("\n")
+        : result.error;
+
+      throw new Error(
+        details || "No se pudo crear el loadout.",
       );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        const details = Array.isArray(result.details)
-          ? result.details.join("\n")
-          : result.error;
-
-        throw new Error(
-          details || "No se pudo crear el loadout.",
-        );
-      }
-
-      onCreated();
-      onClose();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Error al crear el loadout.",
-      );
-    } finally {
-      setSaving(false);
     }
+
+    await onCreated(
+      result.loadout?.id ?? result.id,
+    );
+
+    onClose();
+  } catch (err) {
+    setError(
+      err instanceof Error
+        ? err.message
+        : "Error al crear el loadout.",
+    );
+  } finally {
+    setSaving(false);
   }
+}
 
   if (loading) {
     return (
@@ -385,45 +390,45 @@ function handleTargetAscensionChange(value: string) {
             <>
               {selectedCharacter.level < 90 && (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-  <label>
-    Nivel objetivo del personaje
-    <input
-      type="number"
-      min={selectedCharacter.level}
-      max={90}
-      value={targetLevel}
-      onChange={(event) =>
-        handleTargetLevelChange(event.target.value)
-      }
-      placeholder={`Actual: ${selectedCharacter.level}`}
-    />
-  </label>
+                  <label>
+                    Nivel objetivo del personaje
+                    <input
+                      type="number"
+                      min={selectedCharacter.level}
+                      max={90}
+                      value={targetLevel}
+                      onChange={(event) =>
+                        handleTargetLevelChange(event.target.value)
+                      }
+                      placeholder={`Actual: ${selectedCharacter.level}`}
+                    />
+                  </label>
 
-  <label>
-    Ascensión objetivo
-    <select
-      value={targetAscension}
-      onChange={(event) =>
-        handleTargetAscensionChange(event.target.value)
-      }
-    >
-      <option value="">Sin objetivo</option>
+                  <label>
+                    Ascensión objetivo
+                    <select
+                      value={targetAscension}
+                      onChange={(event) =>
+                        handleTargetAscensionChange(event.target.value)
+                      }
+                    >
+                      <option value="">Sin objetivo</option>
 
-      {[0, 1, 2, 3, 4, 5, 6]
-        .filter(
-          (ascension) =>
-            ascension >= selectedCharacter.ascension,
-        )
-        .map((ascension) => (
-          <option key={ascension} value={ascension}>
-            Ascensión {ascension}
-            {" — "}
-            Nivel {getLevelFromAscension(ascension)}
-          </option>
-        ))}
-    </select>
-  </label>
-</div>
+                      {[0, 1, 2, 3, 4, 5, 6]
+                        .filter(
+                          (ascension) =>
+                            ascension >= selectedCharacter.ascension,
+                        )
+                        .map((ascension) => (
+                          <option key={ascension} value={ascension}>
+                            Ascensión {ascension}
+                            {" — "}
+                            Nivel {getLevelFromAscension(ascension)}
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+                </div>
               )}
 
               {selectedCharacter.normalAttackLevel < 10 && (

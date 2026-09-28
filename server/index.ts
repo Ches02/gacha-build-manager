@@ -23,14 +23,14 @@ const CURRENT_USER_ID = 1;
 
 const server = createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-if (req.method === "OPTIONS") {
-  res.writeHead(204);
-  res.end();
-  return;
-}
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
   try {
     const url = new URL(
       req.url ?? "/",
@@ -1662,34 +1662,110 @@ if (req.method === "OPTIONS") {
         return;
       }
 
-      const character =
-        await deleteCharacter(
-          id,
-          CURRENT_USER_ID,
-        );
+      let body = "";
 
-      if (!character) {
-        res.writeHead(404);
-        res.end(
-          JSON.stringify({
-            error:
-              "Character no encontrado",
-          }),
-        );
-        return;
-      }
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
 
-      res.writeHead(200);
-      res.end(
-        JSON.stringify(
-          { character },
-          null,
-          2,
-        ),
-      );
+      req.on("end", async () => {
+        try {
+          const data =
+            body.trim() !== ""
+              ? JSON.parse(body)
+              : {};
+
+          let transferLoadoutsToCharacterId:
+            number | undefined;
+
+          if (
+            data.transferLoadoutsToCharacterId !==
+            undefined
+          ) {
+            if (
+              typeof data.transferLoadoutsToCharacterId !==
+              "number" ||
+              !Number.isInteger(
+                data.transferLoadoutsToCharacterId,
+              )
+            ) {
+              res.writeHead(400);
+              res.end(
+                JSON.stringify({
+                  error:
+                    "ID de character destino inválido",
+                }),
+              );
+              return;
+            }
+
+            transferLoadoutsToCharacterId =
+              data.transferLoadoutsToCharacterId;
+          }
+
+          const character =
+            await deleteCharacter(
+              id,
+              CURRENT_USER_ID,
+              transferLoadoutsToCharacterId,
+            );
+
+          if (!character) {
+            res.writeHead(404);
+            res.end(
+              JSON.stringify({
+                error:
+                  "Character no encontrado",
+              }),
+            );
+            return;
+          }
+
+          res.writeHead(200);
+          res.end(
+            JSON.stringify(
+              { character },
+              null,
+              2,
+            ),
+          );
+        } catch (error) {
+          if (
+            error instanceof
+            ReferenceValidationError
+          ) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify(
+                {
+                  error:
+                    "Referencia inválida",
+                  details:
+                    error.details,
+                },
+                null,
+                2,
+              ),
+            );
+            return;
+          }
+
+          res.writeHead(400);
+          res.end(
+            JSON.stringify(
+              {
+                error:
+                  "JSON inválido",
+              },
+              null,
+              2,
+            ),
+          );
+        }
+      });
+
       return;
     }
-
     /* =========================
        USER WEAPONS
        ========================= */
@@ -2572,65 +2648,65 @@ if (req.method === "OPTIONS") {
     }
     /* === POST /api/calculator/weapon/ascension === */
 
-if (
-  req.method === "POST" &&
-  url.pathname === "/api/calculator/weapon/ascension"
-) {
-  let body = "";
+    if (
+      req.method === "POST" &&
+      url.pathname === "/api/calculator/weapon/ascension"
+    ) {
+      let body = "";
 
-  req.on("data", (chunk) => {
-    body += chunk;
-  });
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
 
-  req.on("end", async () => {
-    try {
-      const data = JSON.parse(body);
+      req.on("end", async () => {
+        try {
+          const data = JSON.parse(body);
 
-      const {
-        weaponKey,
-        currentAscension,
-        targetAscension,
-      } = data;
+          const {
+            weaponKey,
+            currentAscension,
+            targetAscension,
+          } = data;
 
-      if (
-        typeof weaponKey !== "string" ||
-        weaponKey.trim() === ""
-      ) {
-        res.writeHead(400);
-        res.end(
-          JSON.stringify({
-            error: "weaponKey es obligatorio",
-          }),
-        );
-        return;
-      }
+          if (
+            typeof weaponKey !== "string" ||
+            weaponKey.trim() === ""
+          ) {
+            res.writeHead(400);
+            res.end(
+              JSON.stringify({
+                error: "weaponKey es obligatorio",
+              }),
+            );
+            return;
+          }
 
-      const result =
-        await calculateWeaponAscensionMaterials(
-          weaponKey,
-          currentAscension,
-          targetAscension,
-        );
+          const result =
+            await calculateWeaponAscensionMaterials(
+              weaponKey,
+              currentAscension,
+              targetAscension,
+            );
 
-      res.writeHead(200);
-      res.end(
-        JSON.stringify(result, null, 2),
-      );
-    } catch (error) {
-      res.writeHead(400);
-      res.end(
-        JSON.stringify({
-          error:
-            error instanceof Error
-              ? error.message
-              : "Error al calcular materiales del arma",
-        }),
-      );
+          res.writeHead(200);
+          res.end(
+            JSON.stringify(result, null, 2),
+          );
+        } catch (error) {
+          res.writeHead(400);
+          res.end(
+            JSON.stringify({
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "Error al calcular materiales del arma",
+            }),
+          );
+        }
+      });
+
+      return;
     }
-  });
-
-  return;
-}
 
     /* =========================
        HOME
@@ -2660,21 +2736,21 @@ if (
 
     /* === GET /api/home/calendar === */
     if (req.method === "GET" && url.pathname === "/api/home/calendar") {
-    const calendar = await getHomeCalendar(
+      const calendar = await getHomeCalendar(
         CURRENT_USER_ID,
         "es",
-    );
+      );
 
-    res.writeHead(200);
-    res.end(
+      res.writeHead(200);
+      res.end(
         JSON.stringify(
-            calendar,
-            null,
-            2,
+          calendar,
+          null,
+          2,
         ),
-    );
-    return;
-}
+      );
+      return;
+    }
 
     /* =========================
        GLOBAL CATALOG
@@ -2844,9 +2920,9 @@ if (
       ),
     );
 
-        /* =========================
-       GENERIC ERROR
-       ========================= */
+    /* =========================
+   GENERIC ERROR
+   ========================= */
 
     console.error("Error en la API:", error);
 

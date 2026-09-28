@@ -196,6 +196,7 @@ export async function getUserLoadouts(userId: number) {
             description: link.buildGuide.description,
         })),
         showInHome: loadout.showInHome,
+        isPreferred: loadout.isPreferred,
     }));
 }
 
@@ -398,6 +399,7 @@ export async function getUserLoadout(
             description: link.buildGuide.description,
         })),
         showInHome: loadout.showInHome,
+        isPreferred: loadout.isPreferred,
     };
 }
 
@@ -498,12 +500,17 @@ async function validateLoadoutReferences(
                 );
             }
         });
+        
     }
 
     if (errors.length > 0) {
         throw new ReferenceValidationError(errors);
     }
+    
 }
+
+
+
 
 /* =========================
    CREATE LOADOUT
@@ -519,7 +526,7 @@ export async function createLoadout(
         artifactLoadoutId?: number | null;
         buildGuideIds?: number[];
         showInHome?: boolean;
-
+        isPreferred?: boolean;
         targetLevel?: number | null;
         targetAscension?: number | null;
         targetNormalAttackLevel?: number | null;
@@ -529,6 +536,18 @@ export async function createLoadout(
     },
 ) {
     await validateLoadoutReferences(userId, data);
+
+    if (data.isPreferred === true) {
+    await prisma.loadout.updateMany({
+        where: {
+            userId,
+            characterId: data.characterId,
+        },
+        data: {
+            isPreferred: false,
+        },
+    });
+}
 
     const loadout = await prisma.loadout.create({
         data: {
@@ -550,6 +569,7 @@ export async function createLoadout(
             targetWeaponLevel: data.targetWeaponLevel ?? null,
 
             showInHome: data.showInHome ?? false,
+            isPreferred: data.isPreferred ?? false,
 
             ...(data.buildGuideIds !== undefined && {
                 buildGuides: {
@@ -579,7 +599,7 @@ export async function updateLoadout(
         artifactLoadoutId?: number | null;
         buildGuideIds?: number[];
         showInHome?: boolean;
-
+        isPreferred?: boolean;
         targetLevel?: number | null;
         targetAscension?: number | null;
         targetNormalAttackLevel?: number | null;
@@ -601,6 +621,26 @@ export async function updateLoadout(
 
     await validateLoadoutReferences(userId, data);
 
+    const newCharacterId =
+        data.characterId ?? existingLoadout.characterId;
+
+    const newIsPreferred =
+        data.isPreferred ?? existingLoadout.isPreferred;
+
+    if (newIsPreferred) {
+        await prisma.loadout.updateMany({
+            where: {
+                userId,
+                characterId: newCharacterId,
+                id: {
+                    not: id,
+                },
+            },
+            data: {
+                isPreferred: false,
+            },
+        });
+    }
     const loadout = await prisma.loadout.update({
         where: {
             id,
@@ -637,6 +677,10 @@ export async function updateLoadout(
 
             ...(data.showInHome !== undefined && {
                 showInHome: data.showInHome,
+            }),
+
+            ...(data.isPreferred !== undefined && {
+                isPreferred: data.isPreferred,
             }),
 
             ...(data.targetLevel !== undefined && {

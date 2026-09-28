@@ -1,10 +1,21 @@
-function Sidebar() {
+type Page = "home" | "mis-pjs";
+
+interface SidebarProps {
+  page: Page;
+  onNavigate: (page: Page) => void;
+}
+
+function Sidebar({
+  page,
+  onNavigate,
+}: SidebarProps) {
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-emerald-900/10 bg-emerald-950 px-5 py-6 text-emerald-50">
       <div className="mb-10">
         <h1 className="text-xl font-bold tracking-tight">
           Benito
         </h1>
+
         <p className="mt-1 text-sm text-emerald-200">
           El asistente para gatchas
         </p>
@@ -15,27 +26,59 @@ function Sidebar() {
           Menú
         </p>
 
-        <button className="rounded-lg bg-emerald-800 px-3 py-2 text-left text-sm font-medium text-white">
+        <button
+          type="button"
+          onClick={() => onNavigate("home")}
+          className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+            page === "home"
+              ? "bg-emerald-800 text-white"
+              : "text-emerald-100 hover:bg-emerald-900"
+          }`}
+        >
           Inicio
         </button>
 
-        <button className="rounded-lg px-3 py-2 text-left text-sm text-emerald-100 transition hover:bg-emerald-900">
+        <button
+          type="button"
+          onClick={() => onNavigate("mis-pjs")}
+          className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+            page === "mis-pjs"
+              ? "bg-emerald-800 text-white"
+              : "text-emerald-100 hover:bg-emerald-900"
+          }`}
+        >
           Mis PJs
         </button>
 
-        <button className="rounded-lg px-3 py-2 text-left text-sm text-emerald-100 transition hover:bg-emerald-900">
+        <button
+          type="button"
+          disabled
+          className="cursor-not-allowed rounded-lg px-3 py-2 text-left text-sm text-emerald-100/40"
+        >
           Mis Armas
         </button>
 
-        <button className="rounded-lg px-3 py-2 text-left text-sm text-emerald-100 transition hover:bg-emerald-900">
+        <button
+          type="button"
+          disabled
+          className="cursor-not-allowed rounded-lg px-3 py-2 text-left text-sm text-emerald-100/40"
+        >
           Mis Artefactos
         </button>
 
-        <button className="rounded-lg px-3 py-2 text-left text-sm text-emerald-100 transition hover:bg-emerald-900">
+        <button
+          type="button"
+          disabled
+          className="cursor-not-allowed rounded-lg px-3 py-2 text-left text-sm text-emerald-100/40"
+        >
           Mis Builds
         </button>
 
-        <button className="rounded-lg px-3 py-2 text-left text-sm text-emerald-100 transition hover:bg-emerald-900">
+        <button
+          type="button"
+          disabled
+          className="cursor-not-allowed rounded-lg px-3 py-2 text-left text-sm text-emerald-100/40"
+        >
           Mis Loadouts
         </button>
       </nav>
@@ -45,15 +88,27 @@ function Sidebar() {
           Catálogo
         </p>
 
-        <button className="rounded-lg px-3 py-2 text-left text-sm text-emerald-100 transition hover:bg-emerald-900">
+        <button
+          type="button"
+          disabled
+          className="cursor-not-allowed rounded-lg px-3 py-2 text-left text-sm text-emerald-100/40"
+        >
           Personajes
         </button>
 
-        <button className="rounded-lg px-3 py-2 text-left text-sm text-emerald-100 transition hover:bg-emerald-900">
+        <button
+          type="button"
+          disabled
+          className="cursor-not-allowed rounded-lg px-3 py-2 text-left text-sm text-emerald-100/40"
+        >
           Armas
         </button>
 
-        <button className="rounded-lg px-3 py-2 text-left text-sm text-emerald-100 transition hover:bg-emerald-900">
+        <button
+          type="button"
+          disabled
+          className="cursor-not-allowed rounded-lg px-3 py-2 text-left text-sm text-emerald-100/40"
+        >
           Artefactos
         </button>
       </nav>
@@ -62,6 +117,7 @@ function Sidebar() {
         <p className="text-sm font-semibold text-emerald-100">
           Mis recursos
         </p>
+
         <p className="mt-1 text-xs leading-relaxed text-emerald-300">
           Próximamente podremos mostrar materiales y recursos pendientes.
         </p>

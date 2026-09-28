@@ -186,6 +186,19 @@ export function validateLoadout(
 
     validateTargetFields(data, errors);
 
+        /* =========================
+       PREFERRED
+       ========================= */
+
+    if (
+        data.isPreferred !== undefined &&
+        typeof data.isPreferred !== "boolean"
+    ) {
+        errors.push(
+            "isPreferred debe ser un booleano",
+        );
+    }
+
     return errors;
 }
 
@@ -278,6 +291,19 @@ export function validateLoadoutUpdate(
         typeof data.showInHome !== "boolean"
     ) {
         errors.push("showInHome debe ser un booleano");
+    }
+
+        /* =========================
+       PREFERRED
+       ========================= */
+
+    if (
+        data.isPreferred !== undefined &&
+        typeof data.isPreferred !== "boolean"
+    ) {
+        errors.push(
+            "isPreferred debe ser un booleano",
+        );
     }
 
     validateTargetFields(data, errors);

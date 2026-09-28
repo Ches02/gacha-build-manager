@@ -34,6 +34,7 @@ model Character {
   normalAttackLevel   Int
   elementalSkillLevel Int
   elementalBurstLevel Int
+  isPreferred Boolean @default(false)
   definition          CharacterDefinition @relation(fields: [definitionKey], references: [key])
   loadouts            Loadout[]
   user                User                @relation(fields: [userId], references: [id])
@@ -233,7 +234,7 @@ model Loadout {
   targetWeaponLevel         Int?
 
   showInHome Boolean @default(false)
-
+  isPreferred Boolean @default(false)
   userId Int
   user   User @relation(fields: [userId], references: [id])
 }

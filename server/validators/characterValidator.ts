@@ -158,6 +158,17 @@ export function validateCharacter(data: Record<string, unknown>): string[] {
     }
   }
 
+    /* =========================
+     PREFERRED
+     ========================= */
+
+  if (
+    data.isPreferred !== undefined &&
+    typeof data.isPreferred !== "boolean"
+  ) {
+    errors.push("isPreferred debe ser un booleano");
+  }
+
   return errors;
 }
 
@@ -316,6 +327,17 @@ export function validateCharacterUpdate(
       errors.push(error);
     }
   }
+  
+    /* =========================
+     PREFERRED
+     ========================= */
 
+  if (
+    data.isPreferred !== undefined &&
+    typeof data.isPreferred !== "boolean"
+  ) {
+    errors.push("isPreferred debe ser un booleano");
+  }
+  
   return errors;
 }
