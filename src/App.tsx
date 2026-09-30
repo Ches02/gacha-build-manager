@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/HomePage";
 import MisPJsPage from "./pages/MisPJsPage";
-
-type Page = "home" | "mis-pjs";
+import MisArmasPage from "./pages/MisArmasPage";
+import type { Page } from "./types/page";
 
 function App() {
   const [page, setPage] = useState<Page>(() => {
@@ -24,6 +24,7 @@ function App() {
     <MainLayout page={page} onNavigate={setPage}>
       {page === "home" && <HomePage />}
       {page === "mis-pjs" && <MisPJsPage />}
+      {page === "mis-armas" && <MisArmasPage />}
     </MainLayout>
   );
 }

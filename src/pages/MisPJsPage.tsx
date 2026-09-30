@@ -2,107 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import CharacterDetailModal from "../components/CharacterDetailModal";
 import CreateCharacterModal from "../components/CreateCharacterModal";
 import CreateLoadoutModal from "../components/CreateLoadoutModal";
-
-interface ApiCharacter {
-  key: string;
-  name: string;
-  element: string;
-  weaponType: {
-    key: string;
-    name: string;
-  };
-  rarity: number;
-  nation: string;
-}
-
-interface ApiUserCharacter {
-  id: number;
-  definitionKey: string;
-}
-
-interface ApiUserCharacter {
-  id: number;
-  definitionKey: string;
-  level: number;
-  constellation: number;
-  friendship: number;
-  ascension: number;
-  normalAttackLevel: number;
-  elementalSkillLevel: number;
-  elementalBurstLevel: number;
-  isPreferred: boolean;
-}
-
-interface ApiUserLoadout {
-  id: number;
-  name: string;
-  description: string | null;
-  isPreferred: boolean;
-
-  character: {
-    id: number;
-    key: string;
-    name: string;
-    element: string;
-    weaponType: {
-      key: string;
-      name: string;
-    };
-    rarity: number;
-    nation: string;
-    level: number;
-    constellation: number;
-    friendship: number;
-    ascension: number;
-    talents: {
-      normalAttack: number;
-      elementalSkill: number;
-      elementalBurst: number;
-    };
-  } | null;
-
-  weapon: {
-    id: number;
-    key: string;
-    name: string;
-    level: number;
-    refinement: number;
-  } | null;
-
-  artifactLoadout: {
-    id: number;
-    name: string;
-    description: string | null;
-    artifacts: {
-      id: number;
-      set: {
-        key: string;
-        name: string;
-      };
-      slot: {
-        key: string;
-        name: string;
-      };
-      mainStat: {
-        key: string;
-        name: string;
-        value: number;
-      };
-      subStats: {
-        key: string;
-        name: string;
-        value: number;
-      }[];
-      level: number;
-    }[];
-  } | null;
-
-  buildGuides: {
-    id: number;
-    name: string;
-    description: string | null;
-  }[];
-}
+import type { ApiCharacter, UserCharacter, UserLoadout } from "../types/character";
+import { getPreferredOrFirst } from "../utils/preferredItem";
 
 const ELEMENTS = [
   { key: "pyro", name: "Pyro" },
@@ -147,7 +48,7 @@ function getSavedFilters() {
 
 function MisPJsPage() {
   const [characters, setCharacters] = useState<ApiCharacter[]>([]);
-  const [userCharacters, setUserCharacters] = useState<ApiUserCharacter[]>([]);
+  const [userCharacters, setUserCharacters] = useState<UserCharacter[]>([]);
 
   const savedFilters = getSavedFilters();
 
@@ -156,7 +57,7 @@ function MisPJsPage() {
   const [selectedElements, setSelectedElements] = useState<string[]>(Array.isArray(savedFilters?.elements) ? savedFilters.elements : []);
   const [selectedWeapons, setSelectedWeapons] = useState<string[]>(Array.isArray(savedFilters?.weapons) ? savedFilters.weapons : []);
 
-  const [loadouts, setLoadouts] = useState<ApiUserLoadout[]>([]);
+  const [loadouts, setLoadouts] = useState<UserLoadout[]>([]);
   const [selectedCharacterKey, setSelectedCharacterKey] = useState<string | null>(null);
   const [selectedCharacterId, setSelectedCharacterId] = useState<number | null>(null);
   const [selectedLoadoutId, setSelectedLoadoutId] = useState<number | null>(null);
@@ -219,9 +120,9 @@ function MisPJsPage() {
         const charactersData = await charactersResponse.json();
         const userCharactersData = await userCharactersResponse.json();
         const catalog: ApiCharacter[] = charactersData.characters ?? charactersData;
-        const owned: ApiUserCharacter[] = userCharactersData.characters ?? userCharactersData;
+        const owned: UserCharacter[] = userCharactersData.characters ?? userCharactersData;
         const loadoutsData = await loadoutsResponse.json();
-        const userLoadouts: ApiUserLoadout[] = loadoutsData.loadouts ?? loadoutsData;
+        const userLoadouts: UserLoadout[] = loadoutsData.loadouts ?? loadoutsData;
 
         setLoadouts(userLoadouts);
 
@@ -330,10 +231,11 @@ function MisPJsPage() {
 
     setSelectedCharacterKey(character.key);
 
-    const preferred =
-      instances.find(
-        (instance) => instance.isPreferred,
-      ) ?? instances[0];
+    const preferred = getPreferredOrFirst(instances);
+
+    if (!preferred) {
+      return;
+    }
 
     setSelectedCharacterId(preferred.id);
 
@@ -343,9 +245,7 @@ function MisPJsPage() {
     );
 
     const preferredLoadout =
-      characterLoadouts.find(
-        (loadout) => loadout.isPreferred,
-      ) ?? characterLoadouts[0];
+      getPreferredOrFirst(characterLoadouts);
 
     setSelectedLoadoutId(
       preferredLoadout?.id ?? null,
@@ -463,61 +363,61 @@ function MisPJsPage() {
   }
 
   async function handleSetPreferredLoadout(loadoutId: number) {
-  try {
-    const currentLoadout = loadouts.find(
-      (loadout) => loadout.id === loadoutId,
-    );
+    try {
+      const currentLoadout = loadouts.find(
+        (loadout) => loadout.id === loadoutId,
+      );
 
-    if (!currentLoadout) {
-      return;
-    }
+      if (!currentLoadout) {
+        return;
+      }
 
-    const newPreferredState = !currentLoadout.isPreferred;
+      const newPreferredState = !currentLoadout.isPreferred;
 
-    const response = await fetch(
-      `http://localhost:3000/api/user/loadouts/${loadoutId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        `http://localhost:3000/api/user/loadouts/${loadoutId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            isPreferred: newPreferredState,
+          }),
         },
-        body: JSON.stringify({
-          isPreferred: newPreferredState,
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ?? "No se pudo actualizar el loadout preferido.",
+        );
+      }
+
+      setLoadouts((currentLoadouts) =>
+        currentLoadouts.map((loadout) => {
+          if (
+            loadout.character?.id !== currentLoadout.character?.id
+          ) {
+            return loadout;
+          }
+
+          return {
+            ...loadout,
+            isPreferred:
+              newPreferredState &&
+              loadout.id === loadoutId,
+          };
         }),
-      },
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error ?? "No se pudo actualizar el loadout preferido.",
+      );
+    } catch (error) {
+      console.error(
+        "Error al actualizar loadout preferido:",
+        error,
       );
     }
-
-    setLoadouts((currentLoadouts) =>
-      currentLoadouts.map((loadout) => {
-        if (
-          loadout.character?.id !== currentLoadout.character?.id
-        ) {
-          return loadout;
-        }
-
-        return {
-          ...loadout,
-          isPreferred:
-            newPreferredState &&
-            loadout.id === loadoutId,
-        };
-      }),
-    );
-  } catch (error) {
-    console.error(
-      "Error al actualizar loadout preferido:",
-      error,
-    );
   }
-}
 
   async function handleDeleteCharacter(
     characterId: number,
@@ -592,7 +492,7 @@ function MisPJsPage() {
       // Instancias que quedan del mismo personaje.
       const remainingInstances =
         updatedCharacters.filter(
-          (character: ApiUserCharacter) =>
+          (character: UserCharacter) =>
             character.definitionKey ===
             deletedCharacter.definitionKey,
         );
@@ -613,7 +513,7 @@ function MisPJsPage() {
       // Preferido primero; si no hay preferido, primero.
       const nextCharacter =
         remainingInstances.find(
-          (character: ApiUserCharacter) =>
+          (character: UserCharacter) =>
             character.isPreferred,
         ) ??
         remainingInstances[0];
@@ -623,14 +523,14 @@ function MisPJsPage() {
       // Buscar el loadout preferido del nuevo personaje.
       const nextCharacterLoadouts =
         updatedLoadouts.filter(
-          (loadout: ApiUserLoadout) =>
+          (loadout: UserLoadout) =>
             loadout.character?.id ===
             nextCharacter.id,
         );
 
       const nextLoadout =
         nextCharacterLoadouts.find(
-          (loadout: ApiUserLoadout) =>
+          (loadout: UserLoadout) =>
             loadout.isPreferred,
         ) ??
         nextCharacterLoadouts[0];
@@ -700,7 +600,7 @@ function MisPJsPage() {
     }
   }
 
-    async function handleUpdateCharacter(
+  async function handleUpdateCharacter(
     characterId: number,
     data: {
       level: number;

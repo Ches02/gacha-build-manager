@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import Sidebar from "../components/Sidebar";
-
-type Page = "home" | "mis-pjs";
+import type { Page } from "../types/page";
 
 interface MainLayoutProps {
   children: ReactNode;

@@ -1,89 +1,9 @@
 import { useState } from "react";
-
-interface UserCharacter {
-  id: number;
-  definitionKey: string;
-  level: number;
-  constellation: number;
-  friendship: number;
-  ascension: number;
-  normalAttackLevel: number;
-  elementalSkillLevel: number;
-  elementalBurstLevel: number;
-  isPreferred: boolean;
-}
-
-interface Weapon {
-  id: number;
-  key: string;
-  name: string;
-  level: number;
-  refinement: number;
-}
-
-interface ArtifactSubStat {
-  key: string;
-  name: string;
-  value: number;
-}
-
-interface Artifact {
-  id: number;
-  set: {
-    key: string;
-    name: string;
-  };
-  slot: {
-    key: string;
-    name: string;
-  };
-  mainStat: {
-    key: string;
-    name: string;
-    value: number;
-  };
-  subStats: ArtifactSubStat[];
-  level: number;
-}
-
-interface ArtifactLoadout {
-  id: number;
-  name: string;
-  description: string | null;
-  artifacts: Artifact[];
-}
-
-interface BuildGuide {
-  id: number;
-  name: string;
-  description: string | null;
-}
-
-interface UserLoadout {
-  id: number;
-  name: string;
-  description: string | null;
-  isPreferred: boolean;
-  character: {
-    id: number;
-    name: string;
-  } | null;
-  weapon: Weapon | null;
-  artifactLoadout: ArtifactLoadout | null;
-  buildGuides: BuildGuide[];
-}
+import type { ApiCharacter, UserCharacter, UserLoadout } from "../types/character";
+import { getAscensionFromLevel, getLevelFromAscension } from "../utils/characterLevel";
 
 interface CharacterDetailModalProps {
-  character: {
-    key: string;
-    name: string;
-    element: string;
-    weaponType: {
-      key: string;
-      name: string;
-    };
-    rarity: number;
-  };
+  character: ApiCharacter;
   userCharacters: UserCharacter[];
   loadouts: UserLoadout[];
   selectedCharacterId: number | null;
@@ -375,37 +295,6 @@ function CharacterDetailModal({
     setTransferTargetCharacterId(null);
   }
 
-  function getAscensionFromLevel(level: number) {
-    if (level <= 20) return 0;
-    if (level <= 40) return 1;
-    if (level <= 50) return 2;
-    if (level <= 60) return 3;
-    if (level <= 70) return 4;
-    if (level <= 80) return 5;
-    return 6;
-  }
-
-  function getLevelRangeFromAscension(ascension: number) {
-    switch (ascension) {
-      case 0:
-        return { min: 1, max: 20 };
-      case 1:
-        return { min: 20, max: 40 };
-      case 2:
-        return { min: 40, max: 50 };
-      case 3:
-        return { min: 50, max: 60 };
-      case 4:
-        return { min: 60, max: 70 };
-      case 5:
-        return { min: 70, max: 80 };
-      case 6:
-        return { min: 80, max: 90 };
-      default:
-        return { min: 1, max: 90 };
-    }
-  }
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
@@ -631,15 +520,12 @@ function CharacterDetailModal({
                         }
                         onChange={(event) => {
                           const ascension = Number(event.target.value);
-                          const { min, max } =
-                            getLevelRangeFromAscension(ascension);
+                          const maxLevel = getLevelFromAscension(ascension);
 
                           let level = characterEditValues.level;
 
-                          if (level <= min) {
-                            level = min;
-                          } else if (level >= max) {
-                            level = max;
+                          if (level > maxLevel) {
+                            level = maxLevel;
                           }
 
                           setCharacterEditValues({

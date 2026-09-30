@@ -1,16 +1,6 @@
 import { useState } from "react";
-
-interface ApiCharacter {
-  key: string;
-  name: string;
-  element: string;
-  weaponType: {
-    key: string;
-    name: string;
-  };
-  rarity: number;
-  nation: string;
-}
+import type { ApiCharacter } from "../types/character";
+import { getAscensionFromLevel, getLevelFromAscension } from "../utils/characterLevel";
 
 interface CreateCharacterModalProps {
   character: ApiCharacter;
@@ -120,9 +110,12 @@ function CreateCharacterModal({
                 min={1}
                 max={90}
                 value={level}
-                onChange={(event) =>
-                  setLevel(Number(event.target.value))
-                }
+                onChange={(event) => {
+                  const newLevel = Number(event.target.value);
+
+                  setLevel(newLevel);
+                  setAscension(getAscensionFromLevel(newLevel));
+                }}
                 className="rounded-lg border border-emerald-900/20 bg-white px-3 py-2"
               />
             </label>
@@ -168,9 +161,19 @@ function CreateCharacterModal({
                 min={0}
                 max={6}
                 value={ascension}
-                onChange={(event) =>
-                  setAscension(Number(event.target.value))
-                }
+                onChange={(event) => {
+                  const newAscension = Number(event.target.value);
+                  const maxLevel = getLevelFromAscension(newAscension);
+
+                  let newLevel = level;
+
+                  if (newLevel > maxLevel) {
+                    newLevel = maxLevel;
+                  }
+
+                  setAscension(newAscension);
+                  setLevel(newLevel);
+                }}
                 className="rounded-lg border border-emerald-900/20 bg-white px-3 py-2"
               />
             </label>

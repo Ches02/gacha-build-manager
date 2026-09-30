@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getAscensionFromLevel, getLevelFromAscension } from "../utils/characterLevel";
 
 type Character = {
   id: number;
@@ -148,21 +149,6 @@ export default function CreateLoadoutModal({
   const selectedWeapon = weapons.find(
     (weapon) => weapon.id === Number(weaponId),
   );
-
-  function getAscensionFromLevel(level: number): number {
-    if (level <= 20) return 0;
-    if (level <= 40) return 1;
-    if (level <= 50) return 2;
-    if (level <= 60) return 3;
-    if (level <= 70) return 4;
-    if (level <= 80) return 5;
-    return 6;
-  }
-
-  function getLevelFromAscension(ascension: number): number {
-    const levels = [20, 40, 50, 60, 70, 80, 90];
-    return levels[ascension] ?? 20;
-  }
 
   function handleTargetLevelChange(value: string) {
     setTargetLevel(value);

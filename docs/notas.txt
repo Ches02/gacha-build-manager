@@ -38,7 +38,8 @@ Pendiente
 
     └──Autenticación → dejar de usar CURRENT_USER_ID = 1 y preparar usuarios reales.
     └──FrontEnd
-calculadora del home?
+sumar solo arma al home
+el boton ver
 
 
 a futuro

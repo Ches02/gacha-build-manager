@@ -44,14 +44,14 @@ model WeaponDefinition {
   key            String             @id
   rarity         Int
   baseATK        Int
-  subStatTypeKey String //@default("atk-p")
-  subStat        Float
+  subStatTypeKey String? //@default("atk-p")
+  subStat        Float?
   weaponTypeKey  String
   weaponType     WeaponType         @relation(fields: [weaponTypeKey], references: [key])
-  subStatType    StatType           @relation(fields: [subStatTypeKey], references: [key])
+  subStatType    StatType?           @relation(fields: [subStatTypeKey], references: [key])
+  obtainType     String
   weapons        Weapon[]
   buildGuides    BuildGuideWeapon[]
-
   materials WeaponMaterial?
 }
 

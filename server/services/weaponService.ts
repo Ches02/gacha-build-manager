@@ -84,11 +84,17 @@ export async function getWeapons(
         value: weapon.baseATK,
       },
 
-      subStat: {
-        key: weapon.subStatTypeKey,
-        name: subStatTranslation?.text ?? weapon.subStatTypeKey,
-        value: weapon.subStat,
-      },
+      subStat:
+        weapon.subStatTypeKey !== null &&
+          weapon.subStat !== null
+          ? {
+            key: weapon.subStatTypeKey,
+            name:
+              subStatTranslation?.text ??
+              weapon.subStatTypeKey,
+            value: weapon.subStat,
+          }
+          : null,
 
       effect: effectTranslation?.text ?? "",
 
@@ -98,6 +104,7 @@ export async function getWeapons(
       },
 
       rarity: weapon.rarity,
+      obtainType: weapon.obtainType,
     };
   });
 }
@@ -175,11 +182,17 @@ export async function getWeapon(key: string, language: string) {
       value: weapon.baseATK,
     },
 
-    subStat: {
-      key: weapon.subStatTypeKey,
-      name: subStatTranslation?.text ?? weapon.subStatTypeKey,
-      value: weapon.subStat,
-    },
+    subStat:
+      weapon.subStatTypeKey !== null &&
+        weapon.subStat !== null
+        ? {
+          key: weapon.subStatTypeKey,
+          name:
+            subStatTranslation?.text ??
+            weapon.subStatTypeKey,
+          value: weapon.subStat,
+        }
+        : null,
 
     effect: effectTranslation?.text ?? "",
 
@@ -276,18 +289,18 @@ export async function updateWeapon(
   }
 
   if (data.definitionKey !== undefined) {
-  const definition = await prisma.weaponDefinition.findUnique({
-    where: {
-      key: data.definitionKey,
-    },
-  });
+    const definition = await prisma.weaponDefinition.findUnique({
+      where: {
+        key: data.definitionKey,
+      },
+    });
 
-  if (!definition) {
-    throw new ReferenceValidationError([
-      "definitionKey no corresponde a un arma existente",
-    ]);
+    if (!definition) {
+      throw new ReferenceValidationError([
+        "definitionKey no corresponde a un arma existente",
+      ]);
+    }
   }
-}
 
   return prisma.weapon.update({
     where: {

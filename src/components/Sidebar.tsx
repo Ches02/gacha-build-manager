@@ -1,4 +1,4 @@
-type Page = "home" | "mis-pjs";
+import type { Page } from "../types/page";
 
 interface SidebarProps {
   page: Page;
@@ -52,8 +52,12 @@ function Sidebar({
 
         <button
           type="button"
-          disabled
-          className="cursor-not-allowed rounded-lg px-3 py-2 text-left text-sm text-emerald-100/40"
+          onClick={() => onNavigate("mis-armas")}
+          className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+            page === "mis-armas"
+              ? "bg-emerald-800 text-white"
+              : "text-emerald-100 hover:bg-emerald-900"
+          }`}
         >
           Mis Armas
         </button>
