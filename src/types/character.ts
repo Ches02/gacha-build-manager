@@ -1,4 +1,5 @@
-export interface ApiCharacter {
+//RESPONSE de /api/characters/
+export interface Character {
   key: string;
   name: string;
   element: string;
@@ -10,7 +11,27 @@ export interface ApiCharacter {
   nation: string;
 }
 
+//RESPONSE de /api/user/characters/
 export interface UserCharacter {
+  id: number;
+  definitionKey: string;
+  userId: number;
+  level: number;
+  constellation: number;
+  friendship: number;
+  ascension: number;
+  normalAttackLevel: number;
+  elementalSkillLevel: number;
+  elementalBurstLevel: number;
+  isPreferred: boolean;
+    definition: {
+    key: string;
+    element: string;
+    rarity: number;
+  };
+}
+
+/*export interface UserCharacter {
   id: number;
   definitionKey: string;
   level: number;
@@ -23,66 +44,17 @@ export interface UserCharacter {
   isPreferred: boolean;
 }
 
-export interface Weapon {
+export interface ApiUserCharacter {
   id: number;
-  key: string;
-  name: string;
+  definitionKey: string;
   level: number;
-  refinement: number;
-}
-
-export interface ArtifactSubStat {
-  key: string;
-  name: string;
-  value: number;
-}
-
-export interface Artifact {
-  id: number;
-  set: {
+  ascension: number;
+  normalAttackLevel: number;
+  elementalSkillLevel: number;
+  elementalBurstLevel: number;
+  definition: {
     key: string;
-    name: string;
+    element: string;
+    rarity: number;
   };
-  slot: {
-    key: string;
-    name: string;
-  };
-  mainStat: {
-    key: string;
-    name: string;
-    value: number;
-  };
-  subStats: ArtifactSubStat[];
-  level: number;
-}
-
-export interface ArtifactLoadout {
-  id: number;
-  name: string;
-  description: string | null;
-  artifacts: Artifact[];
-}
-
-export interface BuildGuide {
-  id: number;
-  name: string;
-  description: string | null;
-}
-
-export interface UserLoadout {
-  id: number;
-  name: string;
-  description: string | null;
-  isPreferred: boolean;
-
-  character: {
-    id: number;
-    name: string;
-  } | null;
-
-  weapon: Weapon | null;
-
-  artifactLoadout: ArtifactLoadout | null;
-
-  buildGuides: BuildGuide[];
-}
+}*/

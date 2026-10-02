@@ -38,8 +38,10 @@ Pendiente
 
     └──Autenticación → dejar de usar CURRENT_USER_ID = 1 y preparar usuarios reales.
     └──FrontEnd
-sumar solo arma al home
-el boton ver
+main page 
+    el boton ver
+    rehacer la seleccion de que mostrar - pj - loadouts
+    opcion para mostrar solo armas
 
 
 a futuro

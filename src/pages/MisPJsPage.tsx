@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import CharacterDetailModal from "../components/CharacterDetailModal";
 import CreateCharacterModal from "../components/CreateCharacterModal";
 import CreateLoadoutModal from "../components/CreateLoadoutModal";
-import type { ApiCharacter, UserCharacter, UserLoadout } from "../types/character";
+import type { Character, UserCharacter } from "../types/character";
+import type { UserLoadout } from "../types/loadout";
 import { getPreferredOrFirst } from "../utils/preferredItem";
 
 const ELEMENTS = [
@@ -47,7 +48,7 @@ function getSavedFilters() {
 }
 
 function MisPJsPage() {
-  const [characters, setCharacters] = useState<ApiCharacter[]>([]);
+  const [characters, setCharacters] = useState<Character[]>([]);
   const [userCharacters, setUserCharacters] = useState<UserCharacter[]>([]);
 
   const savedFilters = getSavedFilters();
@@ -63,7 +64,7 @@ function MisPJsPage() {
   const [selectedLoadoutId, setSelectedLoadoutId] = useState<number | null>(null);
 
   const [showCreateCharacterModal, setShowCreateCharacterModal] = useState(false);
-  const [characterToCreate, setCharacterToCreate] = useState<ApiCharacter | null>(null);
+  const [characterToCreate, setCharacterToCreate] = useState<Character | null>(null);
   const [showCreateLoadoutModal, setShowCreateLoadoutModal] = useState(false);
   const [createdCharacterId, setCreatedCharacterId] = useState<number | null>(null);
 
@@ -119,7 +120,7 @@ function MisPJsPage() {
 
         const charactersData = await charactersResponse.json();
         const userCharactersData = await userCharactersResponse.json();
-        const catalog: ApiCharacter[] = charactersData.characters ?? charactersData;
+        const catalog: Character[] = charactersData.characters ?? charactersData;
         const owned: UserCharacter[] = userCharactersData.characters ?? userCharactersData;
         const loadoutsData = await loadoutsResponse.json();
         const userLoadouts: UserLoadout[] = loadoutsData.loadouts ?? loadoutsData;
@@ -217,7 +218,7 @@ function MisPJsPage() {
     setSelected([...selected, value]);
   }
 
-  function openCharacter(character: ApiCharacter) {
+  function openCharacter(character: Character) {
     const instances = userCharacters.filter(
       (userCharacter) =>
         userCharacter.definitionKey === character.key,
@@ -512,12 +513,15 @@ function MisPJsPage() {
 
       // Preferido primero; si no hay preferido, primero.
       const nextCharacter =
-        remainingInstances.find(
-          (character: UserCharacter) =>
-            character.isPreferred,
-        ) ??
-        remainingInstances[0];
+        getPreferredOrFirst<UserCharacter>(
+          remainingInstances,
+        );
 
+      if (!nextCharacter) {
+        setSelectedCharacterId(null);
+        setSelectedLoadoutId(null);
+        return;
+      }
       setSelectedCharacterId(nextCharacter.id);
 
       // Buscar el loadout preferido del nuevo personaje.
@@ -584,9 +588,7 @@ function MisPJsPage() {
         );
 
         const nextLoadout =
-          remainingLoadouts.find(
-            (loadout) => loadout.isPreferred,
-          ) ?? remainingLoadouts[0];
+          getPreferredOrFirst(remainingLoadouts);
 
         setSelectedLoadoutId(
           nextLoadout?.id ?? null,

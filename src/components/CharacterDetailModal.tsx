@@ -1,9 +1,10 @@
 import { useState } from "react";
-import type { ApiCharacter, UserCharacter, UserLoadout } from "../types/character";
+import type { Character, UserCharacter } from "../types/character";
+import type { UserLoadout } from "../types/loadout";
 import { getAscensionFromLevel, getLevelFromAscension } from "../utils/characterLevel";
 
 interface CharacterDetailModalProps {
-  character: ApiCharacter;
+  character: Character;
   userCharacters: UserCharacter[];
   loadouts: UserLoadout[];
   selectedCharacterId: number | null;
@@ -960,7 +961,7 @@ function CharacterDetailModal({
                           <p className="font-medium">
                             {
                               selectedLoadout.weapon
-                                .name
+                                .definitionKey
                             }
                           </p>
 

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import type { ApiCharacter } from "../types/character";
+import type { Character } from "../types/character";
 import { getAscensionFromLevel, getLevelFromAscension } from "../utils/characterLevel";
 
 interface CreateCharacterModalProps {
-  character: ApiCharacter;
+  character: Character;
   onClose: () => void;
   onCreated: (characterId: number) => void;
 }

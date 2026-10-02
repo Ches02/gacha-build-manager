@@ -1,43 +1,9 @@
 import { useEffect, useState } from "react";
 import { getAscensionFromLevel, getLevelFromAscension } from "../utils/characterLevel";
-
-type Character = {
-  id: number;
-  definitionKey: string;
-  level: number;
-  ascension: number;
-  normalAttackLevel: number;
-  elementalSkillLevel: number;
-  elementalBurstLevel: number;
-  definition: {
-    key: string;
-    element: string;
-    rarity: number;
-  };
-};
-
-type Weapon = {
-  id: number;
-  definitionKey: string;
-  level: number;
-  refinement: number;
-  definition: {
-    key: string;
-    rarity: number;
-  };
-};
-
-type ArtifactLoadout = {
-  id: number;
-  name: string;
-  description: string | null;
-};
-
-type BuildGuide = {
-  id: number;
-  name: string;
-  description: string | null;
-};
+import type { UserCharacter } from "../types/character";
+import type { UserWeapon } from "../types/weapon";
+import type { ArtifactLoadout } from "../types/loadout";
+import type { BuildGuide } from "../types/buildGuide";
 
 type Props = {
   characterId?: number;
@@ -50,8 +16,8 @@ export default function CreateLoadoutModal({
   onClose,
   onCreated,
 }: Props) {
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [weapons, setWeapons] = useState<Weapon[]>([]);
+  const [characters, setCharacters] = useState<UserCharacter[]>([]);
+  const [weapons, setWeapons] = useState<UserWeapon[]>([]);
   const [artifactLoadouts, setArtifactLoadouts] = useState<
     ArtifactLoadout[]
   >([]);
