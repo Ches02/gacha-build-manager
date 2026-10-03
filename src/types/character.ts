@@ -24,7 +24,7 @@ export interface UserCharacter {
   elementalSkillLevel: number;
   elementalBurstLevel: number;
   isPreferred: boolean;
-    definition: {
+  definition: {
     key: string;
     element: string;
     rarity: number;

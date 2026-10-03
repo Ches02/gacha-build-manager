@@ -2,19 +2,9 @@
 import { useEffect, useState } from "react";
 import CharacterCard from "../components/CharacterCard";
 import CreateLoadoutModal from "../components/CreateLoadoutModal";
-
+import type { MaterialCategory } from "../types/materials";
 
 /*--- CHARACTER CARD ---*/
-interface ApiMaterial {
-  materialKey: string;
-  quantity: number;
-  name: string;
-  type: string;
-}
-
-interface ApiMaterialCategory {
-  materials: ApiMaterial[];
-}
 
 interface ApiCharacterCard {
   id: number;
@@ -77,9 +67,9 @@ interface ApiCharacterCard {
   } | null;
 
   materials: {
-    ascension: ApiMaterialCategory;
-    talents: ApiMaterialCategory;
-    weapon: ApiMaterialCategory;
+    ascension: MaterialCategory;
+    talents: MaterialCategory;
+    weapon: MaterialCategory;
   };
 }
 
@@ -434,30 +424,30 @@ function HomePage() {
                 {
                   title: "Ascensión",
                   materials: card.materials.ascension.materials.map(
-                    (material) => ({
-                      name: material.name,
-                      icon: `/images/materials/${material.type}/${material.materialKey}.webp`,
-                      required: material.quantity,
+                    (materialRequirement) => ({
+                      name: materialRequirement.name,
+                      icon: `/images/materials/${materialRequirement.type}/${materialRequirement.materialKey}.webp`,
+                      required: materialRequirement.quantity,
                     }),
                   ),
                 },
                 {
                   title: "Talentos",
                   materials: card.materials.talents.materials.map(
-                    (material) => ({
-                      name: material.name,
-                      icon: `/images/materials/${material.type}/${material.materialKey}.webp`,
-                      required: material.quantity,
+                    (materialRequirement) => ({
+                      name: materialRequirement.name,
+                      icon: `/images/materials/${materialRequirement.type}/${materialRequirement.materialKey}.webp`,
+                      required: materialRequirement.quantity,
                     }),
                   ),
                 },
                 {
                   title: "Armas",
                   materials: card.materials.weapon.materials.map(
-                    (material) => ({
-                      name: material.name,
-                      icon: `/images/materials/${material.type}/${material.materialKey}.webp`,
-                      required: material.quantity,
+                    (materialRequirement) => ({
+                      name: materialRequirement.name,
+                      icon: `/images/materials/${materialRequirement.type}/${materialRequirement.materialKey}.webp`,
+                      required: materialRequirement.quantity,
                     }),
                   ),
                 },
@@ -708,21 +698,21 @@ function HomePage() {
                   ) : (
                     calendar.talents.required.map((material) => (
                       <div
-                      key={material.name}
-                      title={`${material.name}: necesitás ${material.quantity}`}
-                      className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
-                    >
-                      <img
-                        src={`/images/materials/${material.type}/${material.materialKey}.webp`}
-                        alt={material.name}
-                        title={material.name}
-                        className="h-full w-full object-contain p-0.5"
-                      />
+                        key={material.name}
+                        title={`${material.name}: necesitás ${material.quantity}`}
+                        className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
+                      >
+                        <img
+                          src={`/images/materials/${material.type}/${material.materialKey}.webp`}
+                          alt={material.name}
+                          title={material.name}
+                          className="h-full w-full object-contain p-0.5"
+                        />
 
-                      <span className="absolute inset-x-0 bottom-0 bg-black/60 px-0.5 text-center text-[9px] font-semibold leading-3 text-white">
-                        {material.quantity}
-                      </span>
-                    </div>
+                        <span className="absolute inset-x-0 bottom-0 bg-black/60 px-0.5 text-center text-[9px] font-semibold leading-3 text-white">
+                          {material.quantity}
+                        </span>
+                      </div>
                     ))
                   )}
                 </div>
@@ -731,17 +721,17 @@ function HomePage() {
                   {calendar.talents.availableRare3?.map(
                     (material) => (
                       <div
-                      key={material.name}
-                      title={`${material.name}`}
-                      className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
-                    >
-                      <img
-                        src={`/images/materials/${material.type}/${material.materialKey}.webp`}
-                        alt={material.name}
-                        title={material.name}
-                        className="h-full w-full object-contain p-0.5"
-                      />
-                    </div>
+                        key={material.name}
+                        title={`${material.name}`}
+                        className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
+                      >
+                        <img
+                          src={`/images/materials/${material.type}/${material.materialKey}.webp`}
+                          alt={material.name}
+                          title={material.name}
+                          className="h-full w-full object-contain p-0.5"
+                        />
+                      </div>
                     ),
                   )}
                 </div>
@@ -760,22 +750,22 @@ function HomePage() {
                     </p>
                   ) : (
                     calendar.weapons.required.map((material) => (
-                    <div
-                      key={material.name}
-                      title={`${material.name}: necesitás ${material.quantity}`}
-                      className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
-                    >
-                      <img
-                        src={`/images/materials/${material.type}/${material.materialKey}.webp`}
-                        alt={material.name}
-                        title={material.name}
-                        className="h-full w-full object-contain p-0.5"
-                      />
+                      <div
+                        key={material.name}
+                        title={`${material.name}: necesitás ${material.quantity}`}
+                        className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
+                      >
+                        <img
+                          src={`/images/materials/${material.type}/${material.materialKey}.webp`}
+                          alt={material.name}
+                          title={material.name}
+                          className="h-full w-full object-contain p-0.5"
+                        />
 
-                      <span className="absolute inset-x-0 bottom-0 bg-black/60 px-0.5 text-center text-[9px] font-semibold leading-3 text-white">
-                        {material.quantity}
-                      </span>
-                    </div>
+                        <span className="absolute inset-x-0 bottom-0 bg-black/60 px-0.5 text-center text-[9px] font-semibold leading-3 text-white">
+                          {material.quantity}
+                        </span>
+                      </div>
                     ))
                   )}
                 </div>
@@ -784,17 +774,17 @@ function HomePage() {
                   {calendar.weapons.availableRare4?.map(
                     (material) => (
                       <div
-                      key={material.name}
-                      title={`${material.name}`}
-                      className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
-                    >
-                      <img
-                        src={`/images/materials/${material.type}/${material.materialKey}.webp`}
-                        alt={material.name}
-                        title={material.name}
-                        className="h-full w-full object-contain p-0.5"
-                      />
-                    </div>
+                        key={material.name}
+                        title={`${material.name}`}
+                        className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md border border-emerald-900/10 bg-[#eee9dc]"
+                      >
+                        <img
+                          src={`/images/materials/${material.type}/${material.materialKey}.webp`}
+                          alt={material.name}
+                          title={material.name}
+                          className="h-full w-full object-contain p-0.5"
+                        />
+                      </div>
                     ),
                   )}
                 </div>

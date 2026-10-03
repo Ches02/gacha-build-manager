@@ -11,13 +11,14 @@ export interface Weapon {
     key: string;
     name: string;
     value: number;
-  },
+  }| null;
   effect: string;
   type: {
     key: string;
     name: string;
   };
   rarity: number;
+  obtainType: string;
 }
 
 
@@ -32,8 +33,8 @@ export interface UserWeapon {
     key: string;
     rarity: number;
     baseATK: number;
-    subStatTypeKey: string;
-    subStat: number;
+    subStatTypeKey: string | null;
+    subStat: number | null;
     weaponTypeKey: string;
     obtainType: string;
   };

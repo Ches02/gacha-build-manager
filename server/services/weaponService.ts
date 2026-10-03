@@ -202,6 +202,7 @@ export async function getWeapon(key: string, language: string) {
     },
 
     rarity: weapon.rarity,
+    obtainType: weapon.obtainType,
   };
 }
 

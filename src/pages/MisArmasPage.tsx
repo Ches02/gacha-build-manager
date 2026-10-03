@@ -1,97 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-
-interface ApiWeapon {
-  key: string;
-  name: string;
-  baseStat: {
-    key: string;
-    name: string;
-    value: number;
-  };
-  subStat: {
-    key: string;
-    name: string;
-    value: number;
-  } | null;
-  effect: string;
-  type: {
-    key: string;
-    name: string;
-  };
-  rarity: number;
-  obtainType: string | null;
-}
-
-interface ApiUserWeapon {
-  id: number;
-  definitionKey: string;
-  level: number;
-  refinement: number;
-}
-
-const WEAPON_TYPES = [
-  {
-    key: "espada-ligera",
-    name: "Espada",
-  },
-  {
-    key: "mandoble",
-    name: "Mandoble",
-  },
-  {
-    key: "lanza",
-    name: "Lanza",
-  },
-  {
-    key: "arco",
-    name: "Arco",
-  },
-  {
-    key: "catalizador",
-    name: "Catalizador",
-  },
-];
-
-const OBTAIN_TYPES = [
-  {
-    key: "craft",
-    name: "Forja",
-  },
-  {
-    key: "bp",
-    name: "Pase de batalla",
-  },
-  {
-    key: "brillo",
-    name: "Brillo estelar",
-  },
-  {
-    key: "evento",
-    name: "Evento",
-  },
-  {
-    key: "banner",
-    name: "Banner",
-  },
-  {
-    key: "permanente",
-    name: "Permanente",
-  },
-  {
-    key: "cofres",
-    name: "Cofres",
-  },
-  {
-    key: "otro",
-    name: "Otro",
-  },
-  {
-    key: "pesca",
-    name: "Pesca",
-  },
-];
-
-const RARITIES = ["1", "2", "3", "4", "5"];
+import type { Weapon, UserWeapon } from "../types/weapon";
+import { WEAPON_TYPES, WEAPON_OBTAIN_TYPES, RARITIES } from "../constants/constants";
 
 function getSavedFilters() {
   const saved = localStorage.getItem(
@@ -119,8 +28,8 @@ function getSavedFilters() {
 }
 
 function MisArmasPage() {
-  const [weapons, setWeapons] = useState<ApiWeapon[]>([]);
-  const [userWeapons, setUserWeapons] = useState<ApiUserWeapon[]>([]);
+  const [weapons, setWeapons] = useState<Weapon[]>([]);
+  const [userWeapons, setUserWeapons] = useState<UserWeapon[]>([]);
 
   const savedFilters = getSavedFilters();
 
@@ -204,10 +113,10 @@ function MisArmasPage() {
         const userWeaponsData =
           await userWeaponsResponse.json();
 
-        const catalog: ApiWeapon[] =
+        const catalog: Weapon[] =
           weaponsData.weapons ?? weaponsData;
 
-        const owned: ApiUserWeapon[] =
+        const owned: UserWeapon[] =
           userWeaponsData.weapons ??
           userWeaponsData;
 
@@ -496,7 +405,7 @@ function MisArmasPage() {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
-                  {OBTAIN_TYPES.map((obtainType) => {
+                  {WEAPON_OBTAIN_TYPES.map((obtainType) => {
                     const selected =
                       selectedObtainTypes.includes(
                         obtainType.key,

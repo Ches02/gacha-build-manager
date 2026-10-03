@@ -5,24 +5,7 @@ import CreateLoadoutModal from "../components/CreateLoadoutModal";
 import type { Character, UserCharacter } from "../types/character";
 import type { UserLoadout } from "../types/loadout";
 import { getPreferredOrFirst } from "../utils/preferredItem";
-
-const ELEMENTS = [
-  { key: "pyro", name: "Pyro" },
-  { key: "hydro", name: "Hydro" },
-  { key: "anemo", name: "Anemo" },
-  { key: "electro", name: "Electro" },
-  { key: "dendro", name: "Dendro" },
-  { key: "cryo", name: "Cryo" },
-  { key: "geo", name: "Geo" },
-];
-
-const WEAPONS = [
-  { key: "espada-ligera", name: "Espada", icon: "sword" },
-  { key: "mandoble", name: "Mandoble", icon: "claymore" },
-  { key: "lanza", name: "Lanza", icon: "polearm" },
-  { key: "arco", name: "Arco", icon: "bow" },
-  { key: "catalizador", name: "Catalizador", icon: "catalyst" },
-];
+import { ELEMENTS, WEAPON_TYPES } from "../constants/constants";
 
 function getSavedFilters() {
   const saved = localStorage.getItem("benito-mis-pjs-filters");
@@ -873,7 +856,7 @@ function MisPJsPage() {
                 </p>
 
                 <div className="flex flex-wrap gap-2">
-                  {WEAPONS.map((weapon) => {
+                  {WEAPON_TYPES.map((weapon) => {
                     const selected = selectedWeapons.includes(weapon.key);
 
                     return (

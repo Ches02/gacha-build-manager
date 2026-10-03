@@ -78,3 +78,64 @@ User Loadouts
 
 
 ├── └── │ ───
+
+Estado actual: mis armas
+
+yep, vamos a mis armas page. que inicialmente funcione como la de mis personajes: el filtro ya está
+- hago click en un arma que no tengo > que me muestre el detalle base del arma, dinamico, que me permita verla a lvl1, y ver como avanza segun refinamientos y ascenciones+lvls, config dinamica y los materiales requeridos para cada mejora y un boton de crear arma que abra el popup para insertarla en userweapons(aca quiero editar tamb personajes luego para que funcione asi)
+- hago click en un arma que tengo > que me abra el detalle del arma que tengo, con el selector si tengo mas de 1, crear una nueva y una opcion para simular una nueva y volver a la ventana de cuando no la tengo.
+- cosas extras a mostrar en mi detalle de arma:
+. un apartado que, si tengo un arma equipada en un loadout con pj, me muestre iconitos pequeños delos pjs que la usan(sin repetidos si los hubiera)
+. un despliegue que me muestre los materiales de ascencion requeridos con la ascencion max configurable + un boton para sumar al trackeo en home de la mejora del arma y materiales necesarios. (hay que ajustar tambien home para esto)
+
+Orden en que lo haría
+
+Para no terminar haciendo una telaraña de cambios 😂:
+
+Fase 1 — detalle de arma base
+
+Primero:
+
+MisArmasPage → click arma no poseída → detalle
+
+y hacemos que muestre correctamente la definición.
+
+Fase 2 — escalado dinámico
+
+Nivel:
+
+1 → 20 → 40 → ... → 90
+
+Ascensión:
+
+0 → 6
+
+Refinamiento:
+
+R1 → R5
+
+y que los valores cambien dinámicamente.
+
+Fase 3 — materiales
+
+Conectar el calculador existente y mostrar los materiales según el objetivo.
+
+Fase 4 — crear arma
+
+Crear arma → popup → POST /api/user/weapons.
+
+Fase 5 — detalle de arma poseída
+
+Selector de instancias + editar + crear nueva + simular nueva.
+
+Fase 6 — loadouts
+
+Mostrar los PJs que usan esa instancia concreta.
+
+Fase 7 — seguimiento
+
+Agregar al seguimiento → persistencia → modificar Home para sumar esos materiales.
+
+Home tambien quiero cambiar toda la logica. -sumar personaje - sumar arma - 
+*el loadout/characterCard, lo quiero adaptar para que muestre TODO. Stats y artefactos equipados tambien.
+*que se vea tambien en mis personajes con stats y todo. Va a lo ultimo esto
